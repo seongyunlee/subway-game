@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="kr">
+<th:block th:fragment="badge" >
+    <div class="badge" th:classappend="${classappend}">
+        <div class="badge-main" th:text="${main}"></div>
+        <div class="badge-sub" th:if="${sub}" th:text="${sub}"></div>
+    </div>
+    <script>
+        // Select all elements with the class "badge"
+        var badges = document.querySelectorAll('.badge');
+
+        // Loop through each element and set the border width
+        for (var i = 0; i < badges.length; i++) {
+            badges[i].style.borderRadius = `${badges[i].offsetHeight /2}px`
+        }
+    </script>
+</th:block>
+
+</html>

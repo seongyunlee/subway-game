@@ -1,3 +1,22 @@
 spring:
-  mvc:
-    static-path-pattern: /static/**
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/subway
+    username: root
+    password: gj9r33s&
+  session:
+    timeout: 60
+    jdbc:
+      initialize-schema: always
+      table-name: SPRING_SESSION
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: create
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+

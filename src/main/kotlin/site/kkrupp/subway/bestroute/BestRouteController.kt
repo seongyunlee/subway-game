@@ -6,24 +6,24 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import site.kkrupp.subway.fillblank.dto.BestProblemResponseDto
-import site.kkrupp.subway.fillblank.dto.BestSubmitAnswerResponseDto
+import site.kkrupp.subway.fillblank.dto.FillBlankResponseDto
+import site.kkrupp.subway.fillblank.dto.FillBlankSubmitResponseDto
 import site.kkrupp.subway.fillblank.service.BestRouteService
 
 @Controller
 @RestController
 @RequestMapping("/bestroute")
 class BestRouteController(
-        private val bestRouteService: BestRouteService
+    private val bestRouteService: BestRouteService
 ) {
 
     @GetMapping("/problem")
-    fun getProblem(): ResponseEntity<BestProblemResponseDto> {
-        return ResponseEntity.ok(bestRouteService.getProblem())
+    fun getProblem(): ResponseEntity<FillBlankResponseDto> {
+        return ResponseEntity.ok(FillBlankResponseDto(1, listOf()))
     }
 
     @PostMapping("/submit")
-    fun submitAnswer(): ResponseEntity<BestSubmitAnswerResponseDto> {
-        return ResponseEntity.ok(bestRouteService.submitAnswer())
+    fun submitAnswer(): ResponseEntity<FillBlankSubmitResponseDto> {
+        return ResponseEntity.ok(FillBlankSubmitResponseDto(true, "problemId", "newToken"))
     }
 }

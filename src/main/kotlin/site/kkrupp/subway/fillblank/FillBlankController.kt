@@ -1,13 +1,12 @@
 package site.kkrupp.subway.fillblank
 
-import jakarta.servlet.http.HttpSession
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
-import site.kkrupp.subway.fillblank.dto.FillBlankAnswerDto
-import site.kkrupp.subway.fillblank.dto.FillBlankResponseDto
-import site.kkrupp.subway.fillblank.dto.FillBlankSubmitResponseDto
+import site.kkrupp.subway.bestroute.dto.BestRouteAnswerDto
 import site.kkrupp.subway.fillblank.service.FillBlankService
+import site.kkrupp.subway.player.annotation.RequiredUser
+import site.kkrupp.subway.player.domain.Player
 
 @Controller
 @RestController
@@ -16,19 +15,17 @@ class FillBlankController(
     private val fillBlankService: FillBlankService
 ) {
 
-
-    @GetMapping("/problem")
-    fun getProblem(@RequestParam level: Int): ResponseEntity<FillBlankResponseDto> {
-        return ResponseEntity.ok(fillBlankService.getProblems(level))
+    @GetMapping("/start")
+    fun initialGame(): ResponseEntity<String> {
+        return ResponseEntity.internalServerError().body("NOT IMPLEMENTED YET")
     }
 
     @PostMapping("/submit")
     fun submitAnswer(
-        @RequestBody fillBlankAnswerDto: FillBlankAnswerDto, session: HttpSession
-    ): ResponseEntity<FillBlankSubmitResponseDto> {
+        @RequestBody bestRouteAnswerDto: BestRouteAnswerDto,
+        @RequiredUser player: Player,
+    ): ResponseEntity<String> {
 
-        session.setAttribute("user", "newToken")
-
-        return ResponseEntity.ok(fillBlankService.submitAnswer())
+        return ResponseEntity.internalServerError().body("NOT IMPLEMENTED YET")
     }
 }

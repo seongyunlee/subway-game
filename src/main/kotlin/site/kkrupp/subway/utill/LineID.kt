@@ -1,0 +1,26 @@
+package site.kkrupp.subway.utill
+
+enum class LineID(val id: String) {
+    LINE_1("line-1"),
+    LINE_2("line-2"),
+    LINE_3("line-3"),
+    LINE_4("line-4"),
+    LINE_5("line-5"),
+    LINE_6("line-6"),
+    LINE_7("line-7"),
+    LINE_8("line-8"),
+    LINE_9("line-9"),
+    LINE_AIR("line-air"),
+    LINE_GYEONGUI("line-gyeongui"),
+    LINE_UISINSUL("line-uisinsul"),
+    LINE_GYEONGANG("line-gyeongang"),
+    LINE_GYEONCHUN("line-gyeonchun"),
+    LINE_SINRIM("line-sinrim"),
+    LINE_EVER("line-ever"),
+    LINE_INCHEON1("line-incheon1"),
+    LINE_SEOHEA("line-seohae"),
+    LINE_GIMPO("line-gimpo"),
+    LINE_SINBUNDANG("line-sinbundang"),
+    LINE_INCHEON2("line-incheon2"),
+    LINE_SUINBUNDANG("line-suinbundang"),
+}

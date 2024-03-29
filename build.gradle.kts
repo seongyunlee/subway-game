@@ -6,7 +6,9 @@ plugins {
     id("org.asciidoctor.jvm.convert") version "3.3.2"
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.spring") version "1.9.22"
-    //kotlin("plugin.jpa") version "1.9.22"
+    kotlin("plugin.jpa") version "1.9.22"
+    kotlin("plugin.allopen") version "1.9.22"
+
 }
 
 group = "site.kkrupp"
@@ -40,6 +42,8 @@ dependencies {
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     implementation("org.springframework.session:spring-session-jdbc:3.1.5")
     implementation("com.mysql:mysql-connector-j")
+    implementation("org.springframework.boot:spring-boot-starter-mustache")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
 
 }
@@ -62,4 +66,10 @@ tasks.test {
 tasks.asciidoctor {
     inputs.dir(project.extra["snippetsDir"]!!)
     dependsOn(tasks.test)
+}
+
+allOpen {
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.Embeddable")
+    annotation("jakarta.persistence.MappedSuperclass")
 }

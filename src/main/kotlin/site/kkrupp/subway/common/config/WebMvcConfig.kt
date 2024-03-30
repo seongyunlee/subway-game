@@ -4,10 +4,11 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import site.kkrupp.subway.player.PlayerAnnotationResolver
+import site.kkrupp.subway.player.RequiredPlayerAnnotationResolver
 
 @Configuration
 class WebMvcConfig(
-    val requiredUserResolver: PlayerAnnotationResolver,
+    val requiredUserResolver: RequiredPlayerAnnotationResolver,
     val userResolver: PlayerAnnotationResolver
 ) : WebMvcConfigurer {
 

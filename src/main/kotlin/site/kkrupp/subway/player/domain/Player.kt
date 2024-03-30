@@ -23,4 +23,7 @@ class Player(
 
     @Column(name = "GAME_LIFE")
     var gameLife: Int,
+
+    @Column(name = "CURRENT_CONTEXT")
+    var currentContext: String? = null
 )

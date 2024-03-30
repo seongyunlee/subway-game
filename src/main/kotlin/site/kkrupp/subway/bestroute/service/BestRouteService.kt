@@ -30,6 +30,8 @@ class BestRouteService(
     fun startGame(): BestRouteResponseDto {
         val playerInfo = initialPlayer()
         getProblem(playerInfo.gameScore).let {
+            playerInfo.currentContext = it.id.toString()
+            playerRepository.save(playerInfo)
             return BestRouteResponseDto(playerInfo.playerId!!, it)
         }
     }
@@ -56,14 +58,20 @@ class BestRouteService(
 
     fun submitAnswer(bestRouteAnswerDto: BestRouteAnswerDto, player: Player): BestRouteSubmitResponseDto {
         // TODO: 정답 확인 로직
+        if (player.currentContext != bestRouteAnswerDto.problemId.toString()) {
+            logger.info("Malicious request detected. Player: ${player.playerId}")
+            throw IllegalArgumentException("Invalid request")
+        }
         if (checkAnswer(bestRouteAnswerDto.answer, bestRouteAnswerDto.problemId)) {
             player.gameScore += 1
         } else {
             player.gameLife -= 1
         }
+        val newProblem = getProblem(player.gameScore)
+        player.currentContext = newProblem.id.toString()
         playerRepository.save(player)
         getProblem(player.gameScore).let {
-            return BestRouteSubmitResponseDto(true, it.id, "newToken")
+            return BestRouteSubmitResponseDto(true, it.id, newProblem)
         }
     }
 

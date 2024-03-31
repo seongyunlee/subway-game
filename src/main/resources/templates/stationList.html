@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Station List</title>
+    <a href="/admin">메인으로</a>
+    <script>
+        // Function to make table row editable
+        function makeEditable(row) {
+            // Convert text to editable fields
+            const cells = row.querySelectorAll("td:not(:last-child)"); // Exclude the last cell containing the button
+            cells.forEach(cell => {
+                const text = cell.innerText;
+                cell.innerHTML = `<input type="text" value="${text}">`;
+            });
+
+            // Change "수정" button to "저장"
+            const editButton = row.querySelector(".edit-btn");
+            editButton.innerText = "저장";
+            editButton.setAttribute("onclick", "saveRow(this)");
+        }
+
+        // Function to save the row and post data
+        function saveRow(button) {
+            const row = button.closest("tr");
+            const inputs = row.querySelectorAll("input");
+            const data = Array.from(inputs).map(input => input.value);
+
+            // Example of gathering data, adapt as necessary
+            const postData = {
+                id: data[0], // Assuming the first input is the ID
+                name: data[1], // Adjust according to your data structure
+                // Add more fields as necessary
+            };
+
+            // Post data to server (example)
+            console.log("Posting data:", postData); // Replace with actual post request
+
+            // Convert inputs back to text
+            inputs.forEach((input, index) => {
+                const cell = input.parentElement;
+                cell.innerHTML = data[index];
+            });
+
+            // Change "저장" button back to "수정"
+            button.innerText = "수정";
+            button.setAttribute("onclick", "makeEditable(this.closest('tr'))");
+        }
+    </script>
+</head>
+<body>
+<h1>Station List</h1>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Lines</th>
+        <th>Alias Names</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="station : ${stations}">
+        <td th:text="${station.id}"></td>
+        <td th:text="${station.name}"></td>
+        <td>
+            <ul th:each="line : ${station.lines}">
+                <li th:text="${line.lineId}"></li>
+            </ul>
+        </td>
+        <td>
+            <ul th:each="alias : ${station.aliasName}">
+                <li th:text="${alias.name}"></li>
+            </ul>
+        </td>
+        <td>
+            <button class="edit-btn" onclick="makeEditable(this.closest('tr'))">수정</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+    }
+
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #ddd;
+    }
+</style>
+</html>

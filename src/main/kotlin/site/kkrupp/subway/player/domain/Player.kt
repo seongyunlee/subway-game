@@ -6,7 +6,7 @@ import site.kkrupp.subway.utill.GameType
 
 @Entity
 @Table(name = "player")
-class Player(
+data class Player(
 
     @Id
     @GeneratedValue(generator = "uuid")

@@ -1,8 +1,12 @@
 package site.kkrupp.subway.fillblank.service
 
+import org.apache.coyote.BadRequestException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import site.kkrupp.subway.bestroute.domain.BestRouteProblemAnswer
 import site.kkrupp.subway.bestroute.dto.*
+import site.kkrupp.subway.bestroute.dto.request.BestRouteSubmitAnswerRequestDto
+import site.kkrupp.subway.bestroute.dto.response.*
 import site.kkrupp.subway.bestroute.repository.BestRouteRepository
 import site.kkrupp.subway.fillblank.dto.*
 import site.kkrupp.subway.player.domain.Player
@@ -27,26 +31,26 @@ class BestRouteService(
      * - gameScore (현재 점수)
      * - gameLife (남은 목숨))  를 가지고 있음
      */
-    fun startGame(): BestRouteResponseDto {
+    fun startGame(): BestRouteStartGameResponseDto {
         val playerInfo = initialPlayer()
         getProblem(playerInfo.gameScore).let {
             playerInfo.currentContext = it.id.toString()
             playerRepository.save(playerInfo)
-            return BestRouteResponseDto(playerInfo.playerId!!, it)
+            return BestRouteStartGameResponseDto(playerInfo.playerId!!, it, playerInfo.gameLife, playerInfo.gameScore)
         }
     }
 
     /**
      * Pick right problem based on the score
      */
-    fun getProblem(score: Int): BestRouteProblem {
+    fun getProblem(score: Int): BestRouteProblemDto {
         val problem = bestRouteRepository.findById("1").orElseThrow()
         problem.apply {
-            return BestRouteProblem(
+            return BestRouteProblemDto(
                 id = problem.id,
                 startStation = startStation.name,
                 endStation = endStation.name,
-                choices = listOf(choice1, choice2, choice3, choice4).map { StationChoice(it.id, it.name) }
+                choices = listOf(choice1, choice2, choice3, choice4).map { StationChoiceDto(it.id, it.name) }
             )
         }
     }
@@ -56,27 +60,49 @@ class BestRouteService(
         return playerRepository.save(playerInfo)
     }
 
-    fun submitAnswer(bestRouteAnswerDto: BestRouteAnswerDto, player: Player): BestRouteSubmitResponseDto {
+    fun submitAnswer(
+        bestRouteSubmitAnswerRequestDto: BestRouteSubmitAnswerRequestDto,
+        player: Player
+    ): BestRouteSubmitAnswerResponseDto {
         // TODO: 정답 확인 로직
-        if (player.currentContext != bestRouteAnswerDto.problemId.toString()) {
+        if (player.gameLife <= 0) {
+            throw BadRequestException("Game Over")
+        }
+
+        if (player.currentContext != bestRouteSubmitAnswerRequestDto.problemId.toString()) {
             logger.info("Malicious request detected. Player: ${player.playerId}")
             throw IllegalArgumentException("Invalid request")
         }
-        if (checkAnswer(bestRouteAnswerDto.answer, bestRouteAnswerDto.problemId)) {
-            player.gameScore += 1
-        } else {
+
+        val problem = bestRouteRepository.findById(bestRouteSubmitAnswerRequestDto.problemId.toString()).orElseThrow()
+
+        val isCorrect = checkAnswer(bestRouteSubmitAnswerRequestDto.answer, problem)
+        val result = BestRouteSubmitAnswerResponseDto(
+            isCorrect = isCorrect,
+            answer = problem.answer.id,
+            correctMinute = listOf(
+                CurrentMinute(problem.choice1.id, problem.choice1Time),
+                CurrentMinute(problem.choice2.id, problem.choice2Time),
+                CurrentMinute(problem.choice3.id, problem.choice3Time),
+                CurrentMinute(problem.choice4.id, problem.choice4Time)
+            ),
+            newProblem = getProblem(player.gameScore + isCorrect.let { 1 }),
+            gameLife = player.gameLife,
+            gameScore = player.gameScore
+        )
+
+        if (!result.isCorrect) {
             player.gameLife -= 1
+        } else {
+            player.gameScore += 1
         }
-        val newProblem = getProblem(player.gameScore)
-        player.currentContext = newProblem.id.toString()
+        player.currentContext = result.newProblem.id.toString()
         playerRepository.save(player)
-        getProblem(player.gameScore).let {
-            return BestRouteSubmitResponseDto(true, it.id, newProblem)
-        }
+
+        return result
     }
 
-    private fun checkAnswer(answer: String, problemId: Int): Boolean {
-        val problem = bestRouteRepository.findById(problemId.toString()).orElseThrow()
-        return problem.answer == answer
+    private fun checkAnswer(answer: String, problem: BestRouteProblemAnswer): Boolean {
+        return problem.answer.id == answer
     }
 }

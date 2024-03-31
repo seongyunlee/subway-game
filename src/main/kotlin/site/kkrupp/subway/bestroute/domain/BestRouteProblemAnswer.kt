@@ -24,6 +24,7 @@ data class BestRouteProblemAnswer(
     @JoinColumn(name = "CHOICE1")
     val choice1: Station,
 
+
     @OneToOne
     @JoinColumn(name = "CHOICE2")
     val choice2: Station,
@@ -36,8 +37,20 @@ data class BestRouteProblemAnswer(
     @JoinColumn(name = "CHOICE4")
     val choice4: Station,
 
-    @Column(name = "ANSWER")
-    val answer: String
+    @OneToOne
+    @JoinColumn(name = "ANSWER")
+    val answer: Station,
 
+    @Column(name = "CHOICE1_TIME")
+    val choice1Time: Int,
+
+    @Column(name = "CHOICE2_TIME")
+    val choice2Time: Int,
+
+    @Column(name = "CHOICE3_TIME")
+    val choice3Time: Int,
+
+    @Column(name = "CHOICE4_TIME")
+    val choice4Time: Int,
 )
 

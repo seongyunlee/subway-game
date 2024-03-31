@@ -3,9 +3,9 @@ package site.kkrupp.subway.bestroute
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
-import site.kkrupp.subway.bestroute.dto.BestRouteAnswerDto
-import site.kkrupp.subway.bestroute.dto.BestRouteResponseDto
-import site.kkrupp.subway.bestroute.dto.BestRouteSubmitResponseDto
+import site.kkrupp.subway.bestroute.dto.request.BestRouteSubmitAnswerRequestDto
+import site.kkrupp.subway.bestroute.dto.response.BestRouteStartGameResponseDto
+import site.kkrupp.subway.bestroute.dto.response.BestRouteSubmitAnswerResponseDto
 import site.kkrupp.subway.fillblank.service.BestRouteService
 import site.kkrupp.subway.player.annotation.RequiredUser
 import site.kkrupp.subway.player.domain.Player
@@ -19,15 +19,15 @@ class BestRouteController(
 
 
     @GetMapping("/start")
-    fun startGame(): ResponseEntity<BestRouteResponseDto> {
+    fun startGame(): ResponseEntity<BestRouteStartGameResponseDto> {
         return ResponseEntity.ok(bestRouteService.startGame())
     }
 
     @PostMapping("/submit")
     fun submitAnswer(
-        @RequestBody bestRouteAnswerDto: BestRouteAnswerDto,
+        @RequestBody bestRouteSubmitAnswerRequestDto: BestRouteSubmitAnswerRequestDto,
         @RequiredUser player: Player,
-    ): ResponseEntity<BestRouteSubmitResponseDto> {
-        return ResponseEntity.ok(bestRouteService.submitAnswer(bestRouteAnswerDto, player))
+    ): ResponseEntity<BestRouteSubmitAnswerResponseDto> {
+        return ResponseEntity.ok(bestRouteService.submitAnswer(bestRouteSubmitAnswerRequestDto, player))
     }
 }

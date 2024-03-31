@@ -13,5 +13,8 @@ class AliasName(
     val id: String,
 
     @Column(name = "ALIAS_NAME")
-    val name: String
+    val name: String,
+
+    @Column(name = "STATION_ID")
+    val stationId: String
 )

@@ -16,7 +16,7 @@ class Station(
     @Enumerated(EnumType.STRING)
     val lines: List<StationLine>,
 
-    @OneToMany(mappedBy = "id")
-    val aliasName: List<AliasName>
+    @OneToMany(mappedBy = "stationId")
+    val aliasName: List<AliasName>? = emptyList()
 )
 

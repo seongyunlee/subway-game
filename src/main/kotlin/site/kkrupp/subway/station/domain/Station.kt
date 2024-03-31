@@ -7,7 +7,7 @@ import jakarta.persistence.*
 class Station(
     @Id
     @Column(name = "ID")
-    val id: String,
+    val id: Long,
 
     @Column(name = "NAME")
     var name: String,

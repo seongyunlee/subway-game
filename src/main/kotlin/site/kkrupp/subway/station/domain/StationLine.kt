@@ -13,7 +13,7 @@ class StationLine(
 
 
     @Column(name = "STATION_ID")
-    val stationId: String,
+    val stationId: Long,
 
     @Column(name = "LINE_ID")
     val lineId: String

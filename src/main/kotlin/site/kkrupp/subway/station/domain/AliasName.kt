@@ -8,11 +8,11 @@ class AliasName(
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long?,
+    val id: Long? = null,
 
     @Column(name = "ALIAS_NAME")
     val name: String,
 
     @Column(name = "STATION_ID")
-    val stationId: String
+    val stationId: Long
 )

@@ -27,7 +27,7 @@ class AdminControllerTest {
                 "LINE_9",
                 "LINE_SEOHEA",
             ),
-            aliasName = listOf("김포공항역")
+            aliasNames = listOf("김포공항역")
         )
 
         val result = adminController.saveStation(dto)

@@ -14,5 +14,6 @@ interface StationRepository : JpaRepository<Station, String> {
     @Query("SELECT s FROM Station s JOIN s.lines l WHERE l.lineId != :lineId")
     fun findByLindIdNot(lineId: String): List<Station>
 
+    fun findById(id: Long): Station?
 
 }

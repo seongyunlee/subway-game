@@ -18,7 +18,6 @@ import site.kkrupp.subway.station.repository.StationRepository
 import site.kkrupp.subway.travel.dto.ChatContextDto
 import site.kkrupp.subway.travel.dto.request.TravelSubmitAnswerRequestDto
 import site.kkrupp.subway.utill.GameType
-import java.util.*
 
 
 @ExtendWith(MockitoExtension::class)
@@ -37,12 +36,6 @@ class TravelServiceTest {
     @DisplayName("submitAnswer 정답 + 환승X 제출 테스트")
     fun submitCorrectAnswerTest() {
         // given
-        val player = Player(
-            playerId = "test-player-id",
-            gameType = GameType.TRAVEL,
-            gameLife = 1,
-            gameScore = 0,
-        )
         val dto = TravelSubmitAnswerRequestDto(
             answer = "강남역",
             transferTo = null,
@@ -51,8 +44,6 @@ class TravelServiceTest {
                 previousStationIds = listOf("S001")
             )
         )
-
-        // when
         val storedPlayer = Player(
             playerId = "test-player-id",
             gameType = GameType.TRAVEL,
@@ -60,7 +51,10 @@ class TravelServiceTest {
             gameScore = 0,
             currentContext = dto.chatContext.hashCode().toString()
         )
-        
+
+        // when
+
+
         Mockito.`when`(playerRepository.save(storedPlayer)).thenReturn(storedPlayer)
         Mockito.`when`(stationRepository.findByNameOrAliasName_Name("강남역", "강남역")).thenReturn(
             Station(

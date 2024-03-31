@@ -4,11 +4,9 @@ import org.apache.coyote.BadRequestException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import site.kkrupp.subway.bestroute.domain.BestRouteProblemAnswer
-import site.kkrupp.subway.bestroute.dto.*
 import site.kkrupp.subway.bestroute.dto.request.BestRouteSubmitAnswerRequestDto
 import site.kkrupp.subway.bestroute.dto.response.*
 import site.kkrupp.subway.bestroute.repository.BestRouteRepository
-import site.kkrupp.subway.fillblank.dto.*
 import site.kkrupp.subway.player.domain.Player
 import site.kkrupp.subway.player.repository.PlayerRepository
 import site.kkrupp.subway.utill.GameType
@@ -25,7 +23,6 @@ class BestRouteService(
      *  문제를 하나를 건네줌.
      *  session에서 score를 가져와야함.
      *  score 별로 문제 난이도를 올려서 제공해야함.
-     *  @param playerInfo :
      *  플레이어 정보 , (- gameId (게임에 대한 unique Id)
      * - gameType (어떤 게임을 하는지)
      * - gameScore (현재 점수)

@@ -60,11 +60,11 @@ class TravelServiceTest {
             Station(
                 id = "S002",
                 name = "강남역",
-                aliasName = listOf(
-                    AliasName(id = "1", name = "강남역", stationId = "S002")
+                aliasName = mutableListOf(
+                    AliasName(id = 1, name = "강남역", stationId = "S002")
                 ),
-                lines = listOf(
-                    StationLine(id = "1", stationId = "S002", lineId = "LINE_1")
+                lines = mutableListOf(
+                    StationLine(id = 1, stationId = "S002", lineId = "LINE_1")
                 )
             )
         )
@@ -73,21 +73,21 @@ class TravelServiceTest {
                 Station(
                     id = "S001",
                     name = "서울역",
-                    aliasName = listOf(
-                        AliasName(id = "1", name = "서울역", stationId = "S001")
+                    aliasName = mutableListOf(
+                        AliasName(id = 1, name = "서울역", stationId = "S001")
                     ),
-                    lines = listOf(
-                        StationLine(id = "1", stationId = "S001", lineId = "LINE_1")
+                    lines = mutableListOf(
+                        StationLine(id = 1, stationId = "S001", lineId = "LINE_1")
                     )
                 ),
                 Station(
                     id = "S002",
                     name = "강남역",
-                    aliasName = listOf(
-                        AliasName(id = "1", name = "강남역", stationId = "S002")
+                    aliasName = mutableListOf(
+                        AliasName(id = 1, name = "강남역", stationId = "S002")
                     ),
-                    lines = listOf(
-                        StationLine(id = "1", stationId = "S002", lineId = "LINE_1")
+                    lines = mutableListOf(
+                        StationLine(id = 1, stationId = "S002", lineId = "LINE_1")
                     )
                 )
             )
@@ -97,21 +97,21 @@ class TravelServiceTest {
                 Station(
                     id = "A1234",
                     name = "홍대입구역",
-                    aliasName = listOf(
-                        AliasName(id = "1", name = "홍대입구역", stationId = "A1234")
+                    aliasName = mutableListOf(
+                        AliasName(id = 1, name = "홍대입구역", stationId = "A1234")
                     ),
-                    lines = listOf(
-                        StationLine(id = "1", stationId = "A1234", lineId = "LINE_2")
+                    lines = mutableListOf(
+                        StationLine(id = 1, stationId = "A1234", lineId = "LINE_2")
                     )
                 ),
                 Station(
                     id = "B1234",
                     name = "신촌역",
-                    aliasName = listOf(
-                        AliasName(id = "1", name = "신촌역", stationId = "B1234")
+                    aliasName = mutableListOf(
+                        AliasName(id = 1, name = "신촌역", stationId = "B1234")
                     ),
-                    lines = listOf(
-                        StationLine(id = "1", stationId = "B1234", lineId = "LINE_2")
+                    lines = mutableListOf(
+                        StationLine(id = 1, stationId = "B1234", lineId = "LINE_2")
                     )
                 )
             )

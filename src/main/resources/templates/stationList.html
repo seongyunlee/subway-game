@@ -6,13 +6,35 @@
     <a href="/admin">메인으로</a>
     <script>
         // Function to make table row editable
+        const lineIds = [
+            "LINE_1", "LINE_2", "LINE_3", "LINE_4", "LINE_5", "LINE_6", "LINE_7", "LINE_8", "LINE_9",
+            "LINE_AIR", "LINE_GYEONGUI", "LINE_UISINSUL", "LINE_GYEONGANG", "LINE_GYEONCHUN", "LINE_SINRIM",
+            "LINE_EVER", "LINE_INCHEON1", "LINE_SEOHEA", "LINE_GIMPO", "LINE_SINBUNDANG", "LINE_INCHEON2",
+            "LINE_SUINBUNDANG", "LINE_UIJEONGBU"
+        ]
+        const inputList = lineIds.map(line =>
+            `<input type="checkbox" value="${line}" name="lines" id="${line}">
+        <label>${line}</label><br>`)
+            .join("");
+
         function makeEditable(row) {
             // Convert text to editable fields
-            const cells = row.querySelectorAll("td:not(:last-child)"); // Exclude the last cell containing the button
-            cells.forEach(cell => {
-                const text = cell.innerText;
-                cell.innerHTML = `<input type="text" value="${text}">`;
+            const cells = row.querySelectorAll('td');
+            cells[1].innerHTML = `<input type="text" value="${cells[1].innerText}" readonly>`;
+            const checkLines =
+                Array.from(cells[2].querySelectorAll("li")).map(li => li.innerText);
+            cells[2].innerHTML = inputList;
+            checkLines.map(line => {
+                const input = cells[2].querySelector(`#${line}`)
+                input.checked = true;
             });
+            const aliasNames =
+                Array.from(cells[3].querySelectorAll("li")).map(li => li.innerText);
+            let previousNames = ""
+            if (aliasNames.length > 0) {
+                previousNames = aliasNames.join(", ");
+            }
+            cells[3].innerHTML = `<input type="text" value="${previousNames}">`;
 
             // Change "수정" button to "저장"
             const editButton = row.querySelector(".edit-btn");
@@ -22,29 +44,7 @@
 
         // Function to save the row and post data
         function saveRow(button) {
-            const row = button.closest("tr");
-            const inputs = row.querySelectorAll("input");
-            const data = Array.from(inputs).map(input => input.value);
-
-            // Example of gathering data, adapt as necessary
-            const postData = {
-                id: data[0], // Assuming the first input is the ID
-                name: data[1], // Adjust according to your data structure
-                // Add more fields as necessary
-            };
-
-            // Post data to server (example)
-            console.log("Posting data:", postData); // Replace with actual post request
-
-            // Convert inputs back to text
-            inputs.forEach((input, index) => {
-                const cell = input.parentElement;
-                cell.innerHTML = data[index];
-            });
-
-            // Change "저장" button back to "수정"
-            button.innerText = "수정";
-            button.setAttribute("onclick", "makeEditable(this.closest('tr'))");
+            // post data and will be redirected to the same page
         }
     </script>
 </head>

@@ -1,9 +1,6 @@
 package site.kkrupp.subway.station.domain
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "station_line")
@@ -11,7 +8,8 @@ class StationLine(
 
     @Id
     @Column(name = "ID")
-    val id: String,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
 
 
     @Column(name = "STATION_ID")

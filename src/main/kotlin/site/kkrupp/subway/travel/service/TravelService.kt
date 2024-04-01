@@ -57,7 +57,7 @@ class TravelService(
     /*
      * Pick right station based on the line
      */
-    private fun pickCorrectStation(currentLineID: String, previousStationIds: List<String>?): Station {
+    private fun pickCorrectStation(currentLineID: String, previousStationIds: List<Long>?): Station {
         val stationInLine =
             stationRepository.findByLineId(currentLineID)
         if (previousStationIds.isNullOrEmpty()) {
@@ -67,7 +67,7 @@ class TravelService(
 
     }
 
-    private fun makeAnswer(currentLineID: String, previousStationIds: List<String>?): Station {
+    private fun makeAnswer(currentLineID: String, previousStationIds: List<Long>?): Station {
         if ((0..10).random() != 10) {
             return pickCorrectStation(currentLineID, previousStationIds)
         } else {
@@ -75,7 +75,7 @@ class TravelService(
         }
     }
 
-    private fun pickWrongStation(currentLineID: String, previousStationIds: List<String>?): Station {
+    private fun pickWrongStation(currentLineID: String, previousStationIds: List<Long>?): Station {
         val stationInLine =
             stationRepository.findByLindIdNot(currentLineID)
         if (previousStationIds.isNullOrEmpty()) {
@@ -103,7 +103,8 @@ class TravelService(
         }
         val currentLine = dto.chatContext.currentLine
         val lastPickedStationId = dto.chatContext.previousStationIds.last()
-        val lastPickedStation = stationRepository.findById(lastPickedStationId).get()
+        val lastPickedStation =
+            stationRepository.findById(lastPickedStationId) ?: throw InternalError("Station not found")
         if (!lastPickedStation.lines.map { it.lineId }.contains(currentLine)) {
             // 오답 신고 성공
             player.gameScore += 10

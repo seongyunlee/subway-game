@@ -99,7 +99,7 @@ class BestRouteService(
         return result
     }
 
-    private fun checkAnswer(answer: String, problem: BestRouteProblemAnswer): Boolean {
+    private fun checkAnswer(answer: Long, problem: BestRouteProblemAnswer): Boolean {
         return problem.answer.id == answer
     }
 }

@@ -10,7 +10,7 @@ data class BestRouteProblemAnswer(
     @Id
     @Column(name = "PROBLEM_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int,
+    val id: Long,
 
     @OneToOne
     @JoinColumn(name = "START_STATION")

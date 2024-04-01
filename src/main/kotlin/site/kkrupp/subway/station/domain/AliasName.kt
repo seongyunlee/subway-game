@@ -1,20 +1,18 @@
 package site.kkrupp.subway.station.domain
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 
 @Table(name = "alias_name")
 @Entity
 class AliasName(
     @Id
     @Column(name = "ID")
-    val id: String,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
 
     @Column(name = "ALIAS_NAME")
     val name: String,
 
     @Column(name = "STATION_ID")
-    val stationId: String
+    val stationId: Long
 )

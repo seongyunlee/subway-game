@@ -7,16 +7,16 @@ import jakarta.persistence.*
 class Station(
     @Id
     @Column(name = "ID")
-    val id: String,
+    val id: Long,
 
     @Column(name = "NAME")
-    val name: String,
+    var name: String,
 
-    @OneToMany(mappedBy = "stationId")
+    @OneToMany(mappedBy = "stationId", cascade = [CascadeType.ALL], orphanRemoval = true)
     @Enumerated(EnumType.STRING)
-    val lines: List<StationLine>,
+    var lines: MutableList<StationLine>,
 
-    @OneToMany(mappedBy = "stationId")
-    val aliasName: List<AliasName>? = emptyList()
+    @OneToMany(mappedBy = "stationId", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var aliasName: MutableList<AliasName> = mutableListOf()
 )
 

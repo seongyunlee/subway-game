@@ -48,15 +48,11 @@ class AdminController(
                 station.lines.add(StationLine(stationId = station.id, lineId = it))
             }
         }
-        val orgAliasNames = station.aliasName.map { it.name }
-        station.aliasName.removeIf { !dto.aliasNames.contains(it.name) }
-        dto.aliasNames.forEach {
-            if (!orgAliasNames.contains(it)) {
-                station.aliasName.add(AliasName(name = it, stationId = station.id))
-            }
-        }
+        station.aliasName.clear()
+        station.aliasName.addAll(dto.aliasNames.map { AliasName(name = it, stationId = station.id) })
 
         logger.info("station: ${station.lines.map { it.lineId }}")
+        logger.info("alias: ${station.aliasName.map { it.name }}")
 
         stationRepository.save(station)
 

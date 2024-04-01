@@ -34,7 +34,7 @@
             if (aliasNames.length > 0) {
                 previousNames = aliasNames.join(", ");
             }
-            cells[3].innerHTML = `<input type="text" id="aliasNames" value="${previousNames}">`;
+            cells[3].innerHTML = `<textarea type="text" id="aliasNames" >${previousNames}</textarea>`;
 
             // Change "수정" button to "저장"
             const editButton = row.querySelector(".edit-btn");
@@ -48,7 +48,7 @@
                 id: row.querySelector("#stationId").innerText,
                 name: row.querySelector("#stationName").value,
                 lines: Array.from(row.querySelectorAll("input:checked")).map(input => input.value),
-                aliasNames: row.querySelector("#aliasNames").value.split(", ")
+                aliasNames: row.querySelector("#aliasNames").value.split(",").map(name => name.trim())
             };
             console.log(data)
             const jsonData = JSON.stringify(data);

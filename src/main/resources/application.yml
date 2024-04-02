@@ -1,0 +1,27 @@
+spring:
+  session:
+    timeout: 60
+    jdbc:
+      initialize-schema: always
+      table-name: SPRING_SESSION
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        globally_quoted_identifiers: true
+        globally_quoted_identifiers_skip_column_definitions: true
+      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+  profiles:
+    include:
+      - cloud
+      - db

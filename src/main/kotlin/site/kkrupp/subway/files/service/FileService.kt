@@ -16,16 +16,19 @@ import java.io.IOException
 class FileService(
     private val amazonS3: AmazonS3
 ) {
-    
+
     @Value("\${cloud.aws.s3.bucket}")
     private val bucket: String? = null
 
     @Throws(IOException::class)
-    fun uploadFile(multipartFile: MultipartFile): String {
-        val fileName = multipartFile.originalFilename
+    fun uploadFile(multipartFile: MultipartFile, replaceName: String? = null): String {
+        var fileName = multipartFile.originalFilename
 
         //파일 형식 구하기
         val ext = fileName!!.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
+        replaceName?.let {
+            fileName = "$it.$ext"
+        }
         var contentType = ""
 
         when (ext) {

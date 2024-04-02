@@ -4,60 +4,21 @@
     <meta charset="UTF-8">
     <title>빈칸 채우기 문제</title>
     <a href="/admin">메인으로</a>
-    <script>
-        // Function to make table row editable
-        const lineIds = [
-            "LINE_1", "LINE_2", "LINE_3", "LINE_4", "LINE_5", "LINE_6", "LINE_7", "LINE_8", "LINE_9",
-            "LINE_AIR", "LINE_GYEONGUI", "LINE_UISINSUL", "LINE_GYEONGANG", "LINE_GYEONCHUN", "LINE_SINRIM",
-            "LINE_EVER", "LINE_INCHEON1", "LINE_SEOHEA", "LINE_GIMPO", "LINE_SINBUNDANG", "LINE_INCHEON2",
-            "LINE_SUINBUNDANG", "LINE_UIJEONGBU"
-        ]
-        const inputList = lineIds.map(line =>
-            `<input type="checkbox" value="${line}" name="lines" id="${line}">
-        <label>${line}</label><br>`)
-            .join("");
-
-        const buttons = document.querySelectorAll(".edit-btn");
-
-        // Add event listener to all edit buttons
-        buttons.forEach(button => button.addEventListener("change", uploadProblem));
-
-        function uploadProblem(row) {
-            // Convert text to editable fields
-            const form = document.createElement("form");
-            form.setAttribute("method", "post");
-            form.setAttribute("action", "/admin/fillBlank/editProblem");
-            let id = row.querySelector("#problemID").innerText;
-            if (id === -1) id = null;
-            let answer = row.querySelector("#problemID").getAttribute("answer");
-            const idInput = document.createElement("input");
-            idInput.setAttribute("name", "id");
-            idInput.setAttribute("value", id);
-            form.appendChild(idInput);
-            const answerInput = document.createElement("input");
-            answerInput.setAttribute("name", "answer");
-            answerInput.setAttribute("value", answer);
-            console.log(form);
-
-            // get A image file from browser
-            const fileInput = document.createElement("input");
-            fileInput.type = "file";
-            fileInput.accept = "image/*";
-            fileInput.name = "problemImage";
-            form.appendChild(fileInput);
-            document.body.appendChild(form);
-            form.submit();
-        }
-    </script>
 </head>
 <body>
 <h1>빈칸 채우기 문제</h1>
 <div>
     <form action="/admin/fillblank/problemList/search" method="GET">
         <input type="text" id="stationName" name="searchName" placeholder="역 이름"/>
-        <button>검색</button>
+        <button type="submit">검색</button>
     </form>
 </div>
+<h3>
+    <span>등록된 문제 수 :</span>
+    <span th:text="${totalProblem}"></span>
+    <span>총 역 수: </span>
+    <span th:text="${totalStation}"></span>
+</h3>
 <table>
     <thead>
     <tr>

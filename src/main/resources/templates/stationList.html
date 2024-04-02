@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Station List</title>
+    <title>역목록</title>
     <a href="/admin">메인으로</a>
     <script>
         // Function to make table row editable
@@ -75,7 +75,13 @@
     </script>
 </head>
 <body>
-<h1>Station List</h1>
+<h1>역 목록</h1>
+<div>
+    <form action="/admin/station-list/search" method="GET">
+        <input type="text" id="stationName" name="searchName" placeholder="역 이름"/>
+        <button type="submit">검색</button>
+    </form>
+</div>
 <table>
     <thead>
     <tr>

@@ -1,4 +1,4 @@
-package site.kkrupp.subway.fillblank.service
+package site.kkrupp.subway.travel.service
 
 import jakarta.transaction.Transactional
 import org.apache.coyote.BadRequestException
@@ -31,14 +31,13 @@ class TravelService(
         val nextStation = makeAnswer(
             startLineId,
             listOf()
-        )
+        )!!
         val newContext = ChatContextDto(
             currentLine = startLineId,
             previousStationIds = listOf(nextStation.id)
         )
 
         playerInfo.currentContext = newContext.hashCode().toString()
-        logger.info("hashcode: ${newContext.hashCode()} playerInfo: ${playerInfo}")
 
         playerRepository.save(playerInfo)
 
@@ -57,31 +56,30 @@ class TravelService(
     /*
      * Pick right station based on the line
      */
-    private fun pickCorrectStation(currentLineID: String, previousStationIds: List<Long>?): Station {
+    private fun pickCorrectStation(currentLineID: String, previousStationIds: List<Long>?): Station? {
         val stationInLine =
-            stationRepository.findByLineId(currentLineID)
+            stationRepository.findByLines_lineId(currentLineID)
         if (previousStationIds.isNullOrEmpty()) {
-            return stationInLine.random()
+            return stationInLine.randomOrNull()
         }
-        return stationInLine.filter { it.id !in previousStationIds }.random()
-
+        return stationInLine.filter { it.id !in previousStationIds }.randomOrNull()
     }
 
-    private fun makeAnswer(currentLineID: String, previousStationIds: List<Long>?): Station {
-        if ((0..10).random() != 10) {
-            return pickCorrectStation(currentLineID, previousStationIds)
+    private fun makeAnswer(currentLineID: String, previousStationIds: List<Long>?): Station? {
+        return if ((0..10).random() != 10) {
+            pickCorrectStation(currentLineID, previousStationIds)
         } else {
-            return pickWrongStation(currentLineID, previousStationIds)
+            pickWrongStation(currentLineID, previousStationIds)
         }
     }
 
-    private fun pickWrongStation(currentLineID: String, previousStationIds: List<Long>?): Station {
+    private fun pickWrongStation(currentLineID: String, previousStationIds: List<Long>?): Station? {
         val stationInLine =
-            stationRepository.findByLindIdNot(currentLineID)
+            stationRepository.findByLines_lineIdNot(currentLineID)
         if (previousStationIds.isNullOrEmpty()) {
             return stationInLine.random()
         }
-        return stationInLine.filter { it.id !in previousStationIds }.random()
+        return stationInLine.filter { it.id !in previousStationIds }.randomOrNull()
     }
 
     @Transactional
@@ -112,6 +110,11 @@ class TravelService(
                 currentLine,
                 dto.chatContext.previousStationIds
             )
+            if (changeStation == null) {
+                player.gameLife = 0
+                playerRepository.save(player)
+                return gameOverDto(player, dto.chatContext)
+            }
             dto.chatContext.previousStationIds.removeLast()
             dto.chatContext.previousStationIds.addLast(changeStation.id)
             player.currentContext = dto.chatContext.hashCode().toString()
@@ -126,13 +129,20 @@ class TravelService(
             // 오답 신고 실패
             player.gameLife -= 1
             playerRepository.save(player)
-            return TravelReportAnswerResponseDto(
-                isSuccess = false,
-                gameLife = 0,
-                gameScore = player.gameScore,
-                chatContext = dto.chatContext
-            )
+            return gameOverDto(player, dto.chatContext)
         }
+    }
+
+    private fun gameOverDto(
+        player: Player,
+        chatContext: ChatContextDto
+    ): TravelReportAnswerResponseDto {
+        return TravelReportAnswerResponseDto(
+            isSuccess = false,
+            gameLife = 0,
+            gameScore = player.gameScore,
+            chatContext = chatContext
+        )
     }
 
     @Transactional
@@ -157,6 +167,16 @@ class TravelService(
                 currentLine,
                 dto.chatContext.previousStationIds
             )
+            if (nextStation == null) {
+                player.gameLife = 0
+                playerRepository.save(player)
+                return TravelSubmitAnswerResponseDto(
+                    isCorrect = true,
+                    gameLife = 0,
+                    gameScore = player.gameScore,
+                    chatContext = dto.chatContext
+                )
+            }
             val newContext = ChatContextDto(
                 currentLine = currentLine,
                 previousStationIds = dto.chatContext.previousStationIds + nextStation.id

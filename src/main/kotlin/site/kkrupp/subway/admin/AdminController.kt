@@ -1,6 +1,5 @@
 package site.kkrupp.subway.admin
 
-import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -30,13 +29,15 @@ class AdminController(
         return "stationList"
     }
 
-    @Transactional
     @PostMapping("/station-list/save")
-    fun saveStation(@RequestBody dto: SaveStationRequestDto): String {
+    fun saveStation(model: Model, @RequestBody dto: SaveStationRequestDto): String {
         //100 items per page
-        adminService.saveStation(dto)
+        val station = adminService.saveStation(dto)
+        model.addAttribute("stations", listOf(station))
+        model.addAttribute("currentPage", 0)
 
-        return "redirect:station-list"
+
+        return "stationList"
     }
 
     @GetMapping("/fillblank/problemList")
@@ -45,6 +46,10 @@ class AdminController(
         val problems = adminService.getAllFillBlankProblems(page)
         model.addAttribute("problems", problems)
         model.addAttribute("currentPage", page)
+        val problemNumbers = adminService.getNumberOfFillBlankProblems()
+        model.addAttribute("totalProblem", problemNumbers)
+        val numberOfStations = adminService.getNumberOfStations()
+        model.addAttribute("totalStation", numberOfStations)
 
         return "fillBlankProblem"
     }
@@ -70,5 +75,13 @@ class AdminController(
         model.addAttribute("problems", problems)
         model.addAttribute("currentPage", 0)
         return "fillBlankProblem"
+    }
+
+    @GetMapping("/station-list/search")
+    fun searchStation(model: Model, @RequestParam searchName: String): String {
+        val stations = adminService.searchStationByName(searchName)
+        model.addAttribute("stations", stations)
+        model.addAttribute("currentPage", 0)
+        return "stationList"
     }
 }

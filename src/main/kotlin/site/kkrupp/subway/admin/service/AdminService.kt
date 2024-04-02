@@ -27,9 +27,11 @@ class AdminService(
     }
 
     @Transactional
-    fun saveStation(dto: SaveStationRequestDto) {
+    fun saveStation(dto: SaveStationRequestDto): Station {
         val station =
-            stationRepository.findById(dto.id.toString()).orElse(null) ?: return
+            stationRepository.findById(dto.id.toString()).orElseThrow {
+                IllegalArgumentException("Invalid station id")
+            }
         station.name = dto.name
         val orgLines = station.lines.map { it.lineId }
         station.lines.removeIf { !dto.lines.contains(it.lineId) }
@@ -42,7 +44,7 @@ class AdminService(
         station.aliasName.addAll(dto.aliasNames.map { AliasName(name = it, stationId = station.id) })
 
 
-        stationRepository.save(station)
+        return stationRepository.save(station)
 
     }
 
@@ -63,15 +65,33 @@ class AdminService(
     }
 
     @Transactional
+    fun getNumberOfFillBlankProblems(): Int {
+        return fillBlankRepository.count().toInt()
+    }
+
+    @Transactional
+    fun getNumberOfStations(): Int {
+        return stationRepository.count().toInt()
+    }
+
+    @Transactional
     fun getAllFillBlankProblems(page: Int = 0): List<FillBlankProblemAnswer> {
-        val problems = fillBlankRepository.findAll().map {
+        val station = stationRepository.findAll(PageRequest.of(page, 100, Sort.by("id"))).content
+        val problems = station.map {
+            val orgProblem = fillBlankRepository.findByAnswer_id(it.id)
+            //TODO : 한 개역에 문제가 여러 개 있을 때 로직 처리.
             FillBlankProblemAnswer(
-                id = it.id,
-                problemImage = it.problemImage,
-                answer = it.answer,
+                id = it.id.toInt(),
+                problemImage = orgProblem.firstOrNull()?.problemImage ?: "",
+                answer = it,
             )
         }
         return problems
+    }
+
+    @Transactional
+    fun searchStationByName(searchName: String): List<Station> {
+        return stationRepository.findByNameOrAliasName_Name(searchName, searchName) ?: emptyList()
     }
 
     fun editFillBlankProblem(id: Int? = null, answer: Long, problemImage: MultipartFile): FillBlankProblemAnswer {

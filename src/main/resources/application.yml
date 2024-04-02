@@ -25,3 +25,4 @@ spring:
     include:
       - cloud
       - db
+    active: local

@@ -3,7 +3,6 @@ package site.kkrupp.subway.travel
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
-import site.kkrupp.subway.fillblank.service.TravelService
 import site.kkrupp.subway.player.annotation.RequiredUser
 import site.kkrupp.subway.player.domain.Player
 import site.kkrupp.subway.travel.dto.request.TravelReportAnswerRequestDto
@@ -11,6 +10,7 @@ import site.kkrupp.subway.travel.dto.request.TravelSubmitAnswerRequestDto
 import site.kkrupp.subway.travel.dto.response.TravelReportAnswerResponseDto
 import site.kkrupp.subway.travel.dto.response.TravelStartGameResponseDto
 import site.kkrupp.subway.travel.dto.response.TravelSubmitAnswerResponseDto
+import site.kkrupp.subway.travel.service.TravelService
 
 @Controller
 @RestController

@@ -34,7 +34,7 @@ class FillBlankService(
      * Pick right problem based on the score
      */
     fun getProblem(score: Int): FillBlankProblemDto {
-        val problem = fillBlankRepository.findById("1").orElseThrow()
+        val problem = fillBlankRepository.findAll().random()
         problem.apply {
             return FillBlankProblemDto(
                 id = problem.id,
@@ -49,7 +49,7 @@ class FillBlankService(
     }
 
     fun submitAnswer(
-        fillBlankSubmitAnswerRequestDto: FillBlankSubmitAnswerRequestDto,
+        dto: FillBlankSubmitAnswerRequestDto,
         player: Player
     ): FillBlankSubmitAnswerResponseDto {
         // TODO: 정답 확인 로직
@@ -57,14 +57,16 @@ class FillBlankService(
             throw BadRequestException("Game Over")
         }
 
-        if (player.currentContext != fillBlankSubmitAnswerRequestDto.problemId.toString()) {
+        if (player.currentContext != dto.problemId.toString()) {
             logger.info("Malicious request detected. Player: ${player.playerId}")
             throw IllegalArgumentException("Invalid request")
         }
 
-        val problem = fillBlankRepository.findById(fillBlankSubmitAnswerRequestDto.problemId.toString()).orElseThrow()
+        val problem = fillBlankRepository.findById(dto.problemId.toString()).orElseThrow {
+            InternalError("Invalid problem id")
+        }
 
-        val isCorrect = checkAnswer(fillBlankSubmitAnswerRequestDto.answer, problem)
+        val isCorrect = checkAnswer(dto.answer, problem)
 
         if (!isCorrect) {
             player.gameLife -= 1
@@ -89,9 +91,13 @@ class FillBlankService(
     }
 
     private fun checkAnswer(answer: String, problem: FillBlankProblemAnswer): Boolean {
-        val correctAnswers = problem.answer.name + problem.answer.aliasName
-        logger.info("correctAnswers: $correctAnswers")
-        return correctAnswers.contains(answer.trim())
+        val correctAnswers = problem.answer.aliasName.map { it.name }.toMutableSet()
+        correctAnswers.add(problem.answer.name)
+
+        val isCorrect = correctAnswers.contains(answer.trim())
+        logger.info("check Answer : User Answer : $answer, Correct Answer : $correctAnswers The Answer is ${if (isCorrect) "Correct" else "Incorrect"}")
+
+        return isCorrect
     }
 
 }

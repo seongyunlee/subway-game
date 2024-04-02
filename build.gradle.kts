@@ -44,6 +44,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-mustache")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
+
 
 }
 

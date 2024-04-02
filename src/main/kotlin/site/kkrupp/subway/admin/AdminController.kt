@@ -7,6 +7,9 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+import site.kkrupp.subway.fillblank.domain.FillBlankProblemAnswer
+import site.kkrupp.subway.fillblank.repository.FillBlankRepository
 import site.kkrupp.subway.station.domain.AliasName
 import site.kkrupp.subway.station.domain.StationLine
 import site.kkrupp.subway.station.repository.StationRepository
@@ -14,13 +17,13 @@ import site.kkrupp.subway.station.repository.StationRepository
 @Controller
 @RequestMapping("/admin")
 class AdminController(
-    val stationRepository: StationRepository
+    val stationRepository: StationRepository,
+    val fillBlankRepository: FillBlankRepository,
 ) {
     val logger = LoggerFactory.getLogger(this.javaClass)!!
 
     @GetMapping()
     fun mainPage(): String {
-        logger.info("Admin main page")
         return "home"
     }
 
@@ -51,12 +54,51 @@ class AdminController(
         station.aliasName.clear()
         station.aliasName.addAll(dto.aliasNames.map { AliasName(name = it, stationId = station.id) })
 
-        logger.info("station: ${station.lines.map { it.lineId }}")
-        logger.info("alias: ${station.aliasName.map { it.name }}")
 
         stationRepository.save(station)
 
 
-        return "redirect:/admin/station-list"
+        return "redirect:station-list"
+    }
+
+    @GetMapping("/fillblank/problemList")
+    fun fillBlankProblemList(model: Model, @RequestParam page: Int = 0): String {
+
+        val problems = fillBlankRepository.findAll(PageRequest.of(page, 100, Sort.by("id"))).content
+        model.addAttribute("problems", problems)
+        model.addAttribute("currentPage", page)
+
+        return "fillBlankProblem"
+    }
+
+    @PostMapping("fillblank/editProblem")
+    fun editProblem(
+        @RequestParam id: Long?,
+        @RequestParam answer: Long,
+        @RequestParam problemImage: MultipartFile
+    ): String {
+        logger.info("id: $id, answer: $answer, imgFile: $problemImage")
+
+        return "redirect:/admin/fillblank/problemList"
+    }
+
+    @GetMapping("/fillblank/problemList/search")
+    fun fillBlankProblem(model: Model, @RequestParam searchName: String): String {
+        logger.info("stationName: $searchName")
+        val station = stationRepository.findByNameOrAliasName_Name(searchName, searchName)
+            ?: return "redirect:/admin/fillblank/problemList"
+        logger.info("station found: $station")
+        val problems = station.map {
+            val orgProblem = fillBlankRepository.findByAnswer_id(it.id)
+            //TODO : 한 개역에 문제가 여러 개 있을 때 로직 처리.
+            FillBlankProblemAnswer(
+                id = orgProblem.firstOrNull()?.id ?: -1,
+                problemImage = orgProblem.firstOrNull()?.problemImage ?: "",
+                answer = it,
+            )
+        }
+        model.addAttribute("problems", problems)
+        model.addAttribute("currentPage", 0)
+        return "fillBlankProblem"
     }
 }

@@ -9,7 +9,7 @@ interface StationRepository : JpaRepository<Station, String> {
     @Query("SELECT s FROM Station s JOIN s.lines l WHERE l.lineId = :lineId")
     fun findByLineId(lineId: String): List<Station>
 
-    fun findByNameOrAliasName_Name(name: String, aliasName: String): Station?
+    fun findByNameOrAliasName_Name(name: String, aliasName: String): List<Station>?
 
     @Query("SELECT s FROM Station s JOIN s.lines l WHERE l.lineId != :lineId")
     fun findByLindIdNot(lineId: String): List<Station>

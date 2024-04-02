@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>빈칸 채우기 문제</title>
+    <a href="/admin">메인으로</a>
+    <script>
+        // Function to make table row editable
+        const lineIds = [
+            "LINE_1", "LINE_2", "LINE_3", "LINE_4", "LINE_5", "LINE_6", "LINE_7", "LINE_8", "LINE_9",
+            "LINE_AIR", "LINE_GYEONGUI", "LINE_UISINSUL", "LINE_GYEONGANG", "LINE_GYEONCHUN", "LINE_SINRIM",
+            "LINE_EVER", "LINE_INCHEON1", "LINE_SEOHEA", "LINE_GIMPO", "LINE_SINBUNDANG", "LINE_INCHEON2",
+            "LINE_SUINBUNDANG", "LINE_UIJEONGBU"
+        ]
+        const inputList = lineIds.map(line =>
+            `<input type="checkbox" value="${line}" name="lines" id="${line}">
+        <label>${line}</label><br>`)
+            .join("");
+
+        const buttons = document.querySelectorAll(".edit-btn");
+
+        // Add event listener to all edit buttons
+        buttons.forEach(button => button.addEventListener("change", uploadProblem));
+
+        function uploadProblem(row) {
+            // Convert text to editable fields
+            const form = document.createElement("form");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", "/admin/fillBlank/editProblem");
+            let id = row.querySelector("#problemID").innerText;
+            if (id === -1) id = null;
+            let answer = row.querySelector("#problemID").getAttribute("answer");
+            const idInput = document.createElement("input");
+            idInput.setAttribute("name", "id");
+            idInput.setAttribute("value", id);
+            form.appendChild(idInput);
+            const answerInput = document.createElement("input");
+            answerInput.setAttribute("name", "answer");
+            answerInput.setAttribute("value", answer);
+            console.log(form);
+
+            // get A image file from browser
+            const fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = "image/*";
+            fileInput.name = "problemImage";
+            form.appendChild(fileInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+</head>
+<body>
+<h1>빈칸 채우기 문제</h1>
+<div>
+    <form action="/admin/fillblank/problemList/search" method="GET">
+        <input type="text" id="stationName" name="searchName" placeholder="역 이름"/>
+        <button>검색</button>
+    </form>
+</div>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>정답</th>
+        <th>별칭</th>
+        <th>사진</th>
+        <th>수정</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="problem : ${problems}">
+        <td id="problemID" th:text="${problem.id}"></td>
+        <td th:text="${problem.answer.name}"></td>
+        <td>
+            <ul th:each="name : ${problem.answer.aliasName}">
+                <li th:text="${name.name}"></li>
+            </ul>
+        </td>
+        <td>
+            <img th:src="${problem.problemImage}" width="320" height="280" alt="No Image"/>
+        </td>
+        <td>
+            <form method="post" action="/admin/fillblank/editProblem" , enctype="multipart/form-data">
+                <input type="hidden" name="id" th:value="${problem.id}"/>
+                <input type="hidden" name="answer" th:value="${problem.answer.id}"/>
+                <input class=".edit-btn" type="file" value="수정" name="problemImage"/>
+                <button type="submit">수정</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<!-- Table Pagination Navigation -->
+<div>
+    <a th:href="@{/admin/fillblank/problemList?page=0}">처음</a>
+    <a th:href="@{/admin/fillblank/problemList(page=${currentPage}-1)}">이전</a>
+    <span th:text="${currentPage}+1"/>
+    <a th:href="@{/admin/fillblank/problemList(page=${currentPage}+1)}">다음</a>
+</div>
+</body>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+    }
+
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #ddd;
+    }
+</style>
+</html>

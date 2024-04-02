@@ -184,15 +184,22 @@ class TravelService(
 
 
     private fun checkAnswer(chatContext: ChatContextDto, answer: String, transferTo: String?): Boolean {
-        val enteredStation = stationRepository.findByNameOrAliasName_Name(answer, answer) ?: return false
+        val enteredStations = stationRepository.findByNameOrAliasName_Name(answer, answer)
+        if (enteredStations.isNullOrEmpty()) {
+            return false
+        }
+        return enteredStations.any { checkStation(it, transferTo, chatContext) }
+    }
+
+    private fun checkStation(station: Station, transferTo: String?, chatContext: ChatContextDto): Boolean {
         transferTo?.let {
-            if (!enteredStation.lines.map { it.toString() }.contains(transferTo)) {
+            if (!station.lines.map { it.toString() }.contains(transferTo)) {
                 return false
             }
         }
-        val lineIds = enteredStation.lines.map { it.lineId }
+        val lineIds = station.lines.map { it.lineId }
         return lineIds.contains(chatContext.currentLine) &&
-                !chatContext.previousStationIds.contains(enteredStation.id)
+                !chatContext.previousStationIds.contains(station.id)
     }
 
 

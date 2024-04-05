@@ -10,7 +10,6 @@ spring:
       ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -26,3 +25,8 @@ spring:
       - cloud
       - db
     active: local
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: trace

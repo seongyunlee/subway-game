@@ -12,6 +12,8 @@ import site.kkrupp.subway.fillblank.repository.FillBlankRepository
 import site.kkrupp.subway.player.domain.Player
 import site.kkrupp.subway.player.repository.PlayerRepository
 import site.kkrupp.subway.utill.GameType
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 
 @Service
@@ -27,7 +29,7 @@ class FillBlankService(
         val problem = getProblem(playerInfo.gameScore)
         playerInfo.currentContext = problem.id.toString()
         playerRepository.save(playerInfo)
-        return FillBlankStartGameResponseDto(playerInfo.playerId!!, problem, playerInfo.gameLife, playerInfo.gameScore)
+        return FillBlankStartGameResponseDto(playerInfo.playerId, problem, playerInfo.gameLife, playerInfo.gameScore)
     }
 
     /**
@@ -52,7 +54,6 @@ class FillBlankService(
         dto: FillBlankSubmitAnswerRequestDto,
         player: Player
     ): FillBlankSubmitAnswerResponseDto {
-        // TODO: 정답 확인 로직
         if (player.gameLife <= 0) {
             throw BadRequestException("Game Over")
         }
@@ -72,6 +73,10 @@ class FillBlankService(
             player.gameLife -= 1
         } else {
             player.gameScore += 1
+        }
+        if (player.gameLife <= 0) {
+            player.endTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+            logger.info("Game Over. Player: ${player.playerId} ${player.gameScore} ${player.endTime}")
         }
 
         val newProblem = getProblem(player.gameScore)
@@ -95,7 +100,6 @@ class FillBlankService(
         correctAnswers.add(problem.answer.name)
 
         val isCorrect = correctAnswers.contains(answer.trim())
-        logger.info("check Answer : User Answer : $answer, Correct Answer : $correctAnswers The Answer is ${if (isCorrect) "Correct" else "Incorrect"}")
 
         return isCorrect
     }

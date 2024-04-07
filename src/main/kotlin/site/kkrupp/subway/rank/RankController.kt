@@ -16,7 +16,7 @@ import site.kkrupp.subway.rank.dto.GetRankResponseDto
 class RankController(
     private val rankService: RankService
 ) {
-    @PostMapping("/{gameType}/enroll")
+    @PostMapping("/enroll")
     fun enrollRank(@RequestBody dto: EnrollRankRequestDto): ResponseEntity<EnrollRankResponseDto> {
         return ResponseEntity.ok(rankService.enrollRank(dto))
     }

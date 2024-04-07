@@ -7,8 +7,8 @@ import site.kkrupp.subway.rank.Rank
 import java.time.Duration
 import java.time.LocalDate
 
-interface RankRepository : JpaRepository<Rank, Long> {
-    fun findByGameTypeAndCreatedAtOrderByScoreDescCreatedAtDesc(
+interface RankRepository : JpaRepository<Rank, String> {
+    fun findByGameTypeAndCreatedAtOrderByScoreDescDurationAsc(
         gameType: String,
         createdAt: LocalDate,
         limit: Limit

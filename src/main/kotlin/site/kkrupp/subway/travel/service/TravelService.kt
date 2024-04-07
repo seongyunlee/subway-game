@@ -11,6 +11,7 @@ import site.kkrupp.subway.station.repository.StationRepository
 import site.kkrupp.subway.travel.dto.ChatContextDto
 import site.kkrupp.subway.travel.dto.request.TravelReportAnswerRequestDto
 import site.kkrupp.subway.travel.dto.request.TravelSubmitAnswerRequestDto
+import site.kkrupp.subway.travel.dto.response.ChatItemDto
 import site.kkrupp.subway.travel.dto.response.TravelReportAnswerResponseDto
 import site.kkrupp.subway.travel.dto.response.TravelStartGameResponseDto
 import site.kkrupp.subway.travel.dto.response.TravelSubmitAnswerResponseDto
@@ -28,7 +29,7 @@ class TravelService(
     @Transactional
     fun startGame(startLineId: String): TravelStartGameResponseDto {
         val playerInfo = initialPlayer()
-        val nextStation = makeAnswer(
+        val nextStation = makeDealerAnswer(
             startLineId,
             listOf()
         )!!
@@ -37,19 +38,25 @@ class TravelService(
             previousStationIds = listOf(nextStation.id)
         )
 
-        playerInfo.currentContext = newContext.hashCode().toString()
+        playerInfo.currentContext = newContext.toString()
 
         playerRepository.save(playerInfo)
 
 
         return TravelStartGameResponseDto(
-            playerId = playerInfo.playerId!!,
+            playerId = playerInfo.playerId,
             chatContext = ChatContextDto(
                 currentLine = startLineId,
                 previousStationIds = listOf(nextStation.id),
             ),
             gameLife = playerInfo.gameLife,
-            gameScore = playerInfo.gameScore
+            gameScore = playerInfo.gameScore,
+            firstAnswer = ChatItemDto(
+                stationName = nextStation.name,
+                stationId = nextStation.id,
+                originalLine = startLineId,
+                transferTo = null,
+            )
         )
     }
 
@@ -65,7 +72,7 @@ class TravelService(
         return stationInLine.filter { it.id !in previousStationIds }.randomOrNull()
     }
 
-    private fun makeAnswer(currentLineID: String, previousStationIds: List<Long>?): Station? {
+    private fun makeDealerAnswer(currentLineID: String, previousStationIds: List<Long>?): Station? {
         return if ((0..10).random() != 10) {
             pickCorrectStation(currentLineID, previousStationIds)
         } else {
@@ -87,7 +94,7 @@ class TravelService(
         dto: TravelReportAnswerRequestDto,
         player: Player
     ): TravelReportAnswerResponseDto {
-        if (player.currentContext != dto.chatContext.hashCode().toString()) {
+        if (player.currentContext != dto.chatContext.toString()) {
             throw BadRequestException("Invalid request")
         }
         if (player.gameLife <= 0) {
@@ -106,7 +113,7 @@ class TravelService(
         if (!lastPickedStation.lines.map { it.lineId }.contains(currentLine)) {
             // 오답 신고 성공
             player.gameScore += 10
-            val changeStation = makeAnswer(
+            val changeStation = makeDealerAnswer(
                 currentLine,
                 dto.chatContext.previousStationIds
             )
@@ -117,7 +124,7 @@ class TravelService(
             }
             dto.chatContext.previousStationIds.removeLast()
             dto.chatContext.previousStationIds.addLast(changeStation.id)
-            player.currentContext = dto.chatContext.hashCode().toString()
+            player.currentContext = dto.chatContext.toString()
             playerRepository.save(player)
             return TravelReportAnswerResponseDto(
                 isSuccess = true,
@@ -150,8 +157,9 @@ class TravelService(
         dto: TravelSubmitAnswerRequestDto,
         player: Player
     ): TravelSubmitAnswerResponseDto {
-        if (player.currentContext != dto.chatContext.hashCode().toString()) {
-            throw BadRequestException("Invalid request")
+        if (player.currentContext != dto.chatContext.toString()) {
+            logger.info("Malicious request detected. saved:${player.currentContext} incoming:${dto.chatContext}")
+            throw BadRequestException("Malicious request detected. Player: ${player.playerId}")
         }
         if (player.gameLife <= 0) {
             throw BadRequestException("Game Over")
@@ -160,55 +168,86 @@ class TravelService(
             throw BadRequestException("Invalid game type")
         }
         val isCorrect = checkAnswer(dto.chatContext, dto.answer, dto.transferTo)
-        if (isCorrect) {
+        if (isCorrect != null) {
             val currentLine = dto.transferTo ?: dto.chatContext.currentLine
             player.gameScore += 1
-            val nextStation = makeAnswer(
+            val nextStation = makeDealerAnswer(
                 currentLine,
                 dto.chatContext.previousStationIds
             )
             if (nextStation == null) {
+                // 더이상 역이 없을때
                 player.gameLife = 0
                 playerRepository.save(player)
                 return TravelSubmitAnswerResponseDto(
                     isCorrect = true,
                     gameLife = 0,
                     gameScore = player.gameScore,
-                    chatContext = dto.chatContext
+                    chatContext = dto.chatContext,
+                    submittedAnswer = ChatItemDto(
+                        stationName = isCorrect.name,
+                        stationId = isCorrect.id,
+                        originalLine = currentLine,
+                        transferTo = dto.transferTo,
+                    ),
+                    dealerAnswer = null,
                 )
             }
             val newContext = ChatContextDto(
                 currentLine = currentLine,
-                previousStationIds = dto.chatContext.previousStationIds + nextStation.id
+                previousStationIds = dto.chatContext.previousStationIds
+                        + isCorrect.id
+                        + nextStation.id
             )
 
-            player.currentContext = newContext.hashCode().toString()
+            player.currentContext = newContext.toString()
             playerRepository.save(player)
             return TravelSubmitAnswerResponseDto(
                 isCorrect = true,
                 gameLife = player.gameLife,
                 gameScore = player.gameScore,
-                chatContext = newContext
+                chatContext = newContext,
+                submittedAnswer = ChatItemDto(
+                    stationName = isCorrect.name,
+                    stationId = isCorrect.id,
+                    originalLine = currentLine,
+                    transferTo = dto.transferTo,
+                ),
+                dealerAnswer = ChatItemDto(
+                    stationName = nextStation.name,
+                    stationId = nextStation.id,
+                    originalLine = currentLine,
+                    transferTo = dto.transferTo,
+                ),
             )
         } else {
+            //틀렸을때
             player.gameLife = 0
             playerRepository.save(player)
             return TravelSubmitAnswerResponseDto(
                 isCorrect = false,
                 gameLife = player.gameLife,
                 gameScore = player.gameScore,
-                chatContext = dto.chatContext
+                chatContext = dto.chatContext,
+                submittedAnswer = ChatItemDto(
+                    stationName = dto.answer,
+                    stationId = -1,
+                    originalLine = dto.chatContext.currentLine,
+                    transferTo = dto.transferTo ?: dto.chatContext.currentLine
+                ),
+                dealerAnswer = null,
             )
         }
     }
 
 
-    private fun checkAnswer(chatContext: ChatContextDto, answer: String, transferTo: String?): Boolean {
+    private fun checkAnswer(chatContext: ChatContextDto, answer: String, transferTo: String?): Station? {
         val enteredStations = stationRepository.findByNameOrAliasName_Name(answer, answer)
+        logger.info("Entered Stations: $enteredStations")
         if (enteredStations.isNullOrEmpty()) {
-            return false
+            return null
         }
-        return enteredStations.any { checkStation(it, transferTo, chatContext) }
+        return enteredStations.find { checkStation(it, transferTo, chatContext) }
     }
 
     private fun checkStation(station: Station, transferTo: String?, chatContext: ChatContextDto): Boolean {

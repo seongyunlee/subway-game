@@ -1,23 +1,19 @@
 package site.kkrupp.subway.player.domain
 
 import jakarta.persistence.*
-import org.hibernate.annotations.GenericGenerator
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import site.kkrupp.subway.utill.GameType
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.*
 
 @Entity
-@EntityListeners(AuditingEntityListener::class)
 @Table(name = "player")
 data class Player(
 
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "PLAYER_ID")
-    val playerId: String = "",
+    val playerId: String = UUID.randomUUID().toString(),
 
     @Column(name = "GAME_TYPE")
     @Enumerated(EnumType.STRING)

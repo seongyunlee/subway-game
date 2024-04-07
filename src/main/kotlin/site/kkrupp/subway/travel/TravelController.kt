@@ -22,9 +22,9 @@ class TravelController(
 
     @GetMapping("/start")
     fun startGame(
-        @RequestParam startLineId: String
+        @RequestParam startLine: String
     ): ResponseEntity<TravelStartGameResponseDto> {
-        return ResponseEntity.ok(travelService.startGame(startLineId))
+        return ResponseEntity.ok(travelService.startGame(startLine))
     }
 
     @PostMapping("/submit")

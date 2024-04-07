@@ -1,8 +1,6 @@
 package site.kkrupp.subway.rank.dto
 
-import site.kkrupp.subway.rank.Rank
-
 data class GetRankResponseDto(
-    val ranks: List<Rank>,
+    val ranks: List<RankDto>,
     val playerInfo: PlayerInfoDto?
 )

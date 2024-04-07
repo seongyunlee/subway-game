@@ -29,4 +29,5 @@ logging:
   level:
     org:
       hibernate:
-        SQL: trace
+        SQL: off
+    root: DEBUG

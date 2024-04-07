@@ -7,4 +7,5 @@ data class TravelStartGameResponseDto(
     val chatContext: ChatContextDto,
     val gameLife: Int,
     val gameScore: Int,
+    val firstAnswer: ChatItemDto,
 )

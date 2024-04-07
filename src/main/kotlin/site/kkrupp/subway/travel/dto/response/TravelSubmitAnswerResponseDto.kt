@@ -7,4 +7,6 @@ data class TravelSubmitAnswerResponseDto(
     val gameLife: Int,
     val gameScore: Int,
     val chatContext: ChatContextDto,
+    val submittedAnswer: ChatItemDto,
+    val dealerAnswer: ChatItemDto?,
 )

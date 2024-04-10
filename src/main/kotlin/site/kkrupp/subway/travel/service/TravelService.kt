@@ -16,6 +16,8 @@ import site.kkrupp.subway.travel.dto.response.TravelReportAnswerResponseDto
 import site.kkrupp.subway.travel.dto.response.TravelStartGameResponseDto
 import site.kkrupp.subway.travel.dto.response.TravelSubmitAnswerResponseDto
 import site.kkrupp.subway.utill.GameType
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 
 @Service
@@ -73,7 +75,7 @@ class TravelService(
     }
 
     private fun makeDealerAnswer(currentLineID: String, previousStationIds: List<Long>?): Station? {
-        return if ((0..10).random() != 10) {
+        return if ((0..10).random() == 11) {
             pickCorrectStation(currentLineID, previousStationIds)
         } else {
             pickWrongStation(currentLineID, previousStationIds)
@@ -110,6 +112,7 @@ class TravelService(
         val lastPickedStationId = dto.chatContext.previousStationIds.last()
         val lastPickedStation =
             stationRepository.findById(lastPickedStationId) ?: throw InternalError("Station not found")
+        logger.debug("Last Picked Station: $lastPickedStation ${lastPickedStation.lines.map { it.lineId }}")
         if (!lastPickedStation.lines.map { it.lineId }.contains(currentLine)) {
             // 오답 신고 성공
             player.gameScore += 10
@@ -120,7 +123,7 @@ class TravelService(
             if (changeStation == null) {
                 player.gameLife = 0
                 playerRepository.save(player)
-                return gameOverDto(player, dto.chatContext)
+                return gameOverDto(player)
             }
             dto.chatContext.previousStationIds.removeLast()
             dto.chatContext.previousStationIds.addLast(changeStation.id)
@@ -130,25 +133,29 @@ class TravelService(
                 isSuccess = true,
                 gameLife = player.gameLife,
                 gameScore = player.gameScore,
-                chatContext = dto.chatContext
+                changeStation = ChatItemDto(
+                    stationName = changeStation.name,
+                    stationId = changeStation.id,
+                    originalLine = currentLine,
+                    transferTo = null
+                ),
             )
         } else {
-            // 오답 신고 실패
-            player.gameLife -= 1
-            playerRepository.save(player)
-            return gameOverDto(player, dto.chatContext)
+            return gameOverDto(player)
         }
     }
 
     private fun gameOverDto(
         player: Player,
-        chatContext: ChatContextDto
     ): TravelReportAnswerResponseDto {
+        player.endTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+        player.gameLife = 0
+        playerRepository.save(player)
         return TravelReportAnswerResponseDto(
             isSuccess = false,
             gameLife = 0,
             gameScore = player.gameScore,
-            chatContext = chatContext
+            changeStation = null,
         )
     }
 
@@ -178,6 +185,7 @@ class TravelService(
             if (nextStation == null) {
                 // 더이상 역이 없을때
                 player.gameLife = 0
+                player.endTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime()
                 playerRepository.save(player)
                 return TravelSubmitAnswerResponseDto(
                     isCorrect = true,
@@ -223,6 +231,7 @@ class TravelService(
         } else {
             //틀렸을때
             player.gameLife = 0
+            player.endTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime()
             playerRepository.save(player)
             return TravelSubmitAnswerResponseDto(
                 isCorrect = false,
@@ -252,7 +261,7 @@ class TravelService(
 
     private fun checkStation(station: Station, transferTo: String?, chatContext: ChatContextDto): Boolean {
         transferTo?.let {
-            if (!station.lines.map { it.toString() }.contains(transferTo)) {
+            if (!station.lines.map { it.lineId }.contains(transferTo)) {
                 return false
             }
         }

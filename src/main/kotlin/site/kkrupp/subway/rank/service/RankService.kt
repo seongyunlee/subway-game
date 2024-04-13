@@ -94,12 +94,13 @@ class RankService(
         return result
     }
 
+    fun Duration.toKoreanString(): String {
+        val minutes = this.toMinutes()
+        val seconds = this.toSeconds() % 60
+
+        return "${minutes}분 ${seconds}초"
+    }
 
 }
 
-fun Duration.toKoreanString(): String {
-    val minutes = this.toMinutes()
-    val seconds = this.toSeconds() % 60
 
-    return "${minutes}분 ${seconds}초"
-}

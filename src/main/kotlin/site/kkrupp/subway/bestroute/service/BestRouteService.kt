@@ -10,6 +10,8 @@ import site.kkrupp.subway.bestroute.repository.BestRouteRepository
 import site.kkrupp.subway.player.domain.Player
 import site.kkrupp.subway.player.repository.PlayerRepository
 import site.kkrupp.subway.utill.GameType
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @Service
 class BestRouteService(
@@ -33,7 +35,7 @@ class BestRouteService(
         getProblem(playerInfo.gameScore).let {
             playerInfo.currentContext = it.id.toString()
             playerRepository.save(playerInfo)
-            return BestRouteStartGameResponseDto(playerInfo.playerId!!, it, playerInfo.gameLife, playerInfo.gameScore)
+            return BestRouteStartGameResponseDto(playerInfo.playerId, it, playerInfo.gameLife, playerInfo.gameScore)
         }
     }
 
@@ -53,7 +55,7 @@ class BestRouteService(
     }
 
     private fun initialPlayer(): Player {
-        val playerInfo = Player(gameType = GameType.FILLBLANK, gameLife = 3)
+        val playerInfo = Player(gameType = GameType.BESTROUTE, gameLife = 3)
         return playerRepository.save(playerInfo)
     }
 
@@ -74,6 +76,11 @@ class BestRouteService(
         val problem = bestRouteRepository.findById(bestRouteSubmitAnswerRequestDto.problemId.toString()).orElseThrow()
 
         val isCorrect = checkAnswer(bestRouteSubmitAnswerRequestDto.answer, problem)
+        if (isCorrect) {
+            player.gameScore += 1
+        } else {
+            player.gameLife -= 1
+        }
         val result = BestRouteSubmitAnswerResponseDto(
             isCorrect = isCorrect,
             answer = problem.answer.id,
@@ -83,17 +90,16 @@ class BestRouteService(
                 CurrentMinute(problem.choice3.id, problem.choice3Time),
                 CurrentMinute(problem.choice4.id, problem.choice4Time)
             ),
-            newProblem = getProblem(player.gameScore + isCorrect.let { 1 }),
+            newProblem = getProblem(player.gameScore),
             gameLife = player.gameLife,
             gameScore = player.gameScore
         )
 
-        if (!result.isCorrect) {
-            player.gameLife -= 1
-        } else {
-            player.gameScore += 1
-        }
+
         player.currentContext = result.newProblem.id.toString()
+        if (player.gameLife <= 0) {
+            player.endTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+        }
         playerRepository.save(player)
 
         return result

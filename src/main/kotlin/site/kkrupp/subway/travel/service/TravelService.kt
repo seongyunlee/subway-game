@@ -75,7 +75,8 @@ class TravelService(
     }
 
     private fun makeDealerAnswer(currentLineID: String, previousStationIds: List<Long>?): Station? {
-        return if ((0..10).random() == 11) {
+        // 1/10 확률로 오답을 제공
+        return if ((0..10).random() != 1) {
             pickCorrectStation(currentLineID, previousStationIds)
         } else {
             pickWrongStation(currentLineID, previousStationIds)
@@ -112,7 +113,6 @@ class TravelService(
         val lastPickedStationId = dto.chatContext.previousStationIds.last()
         val lastPickedStation =
             stationRepository.findById(lastPickedStationId) ?: throw InternalError("Station not found")
-        logger.debug("Last Picked Station: $lastPickedStation ${lastPickedStation.lines.map { it.lineId }}")
         if (!lastPickedStation.lines.map { it.lineId }.contains(currentLine)) {
             // 오답 신고 성공
             player.gameScore += 10

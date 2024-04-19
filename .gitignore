@@ -40,5 +40,4 @@ out/
 .kotlin
 
 ## Other ###
-application-cloud.yml
-application-db.yml
+application-*.yml

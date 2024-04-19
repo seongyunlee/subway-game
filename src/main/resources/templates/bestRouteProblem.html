@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>최적경로 채우기 문제</title>
+    <a href="/admin">메인으로</a>
+</head>
+<body>
+<h1>최적경로 채우기 문제</h1>
+<div>
+    <form action="/admin/fillblank/problemList/search" method="GET">
+        <input type="text" id="stationName" name="searchName" placeholder="역 이름"/>
+        <button type="submit">검색</button>
+    </form>
+</div>
+<h3>
+    <span>등록된 문제 수 :</span>
+    <span th:text="${totalProblem}"></span>
+</h3>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>정답</th>
+        <th>시작역</th>
+        <th>도착역</th>
+        <th>1</th>
+        <th>2</th>
+        <th>3</th>
+        <th>4</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="problem : ${problems}">
+        <td id="problemID" th:text="${problem.id}"></td>
+        <td th:text="${problem.answer}"></td>
+        <td th:text="${problem.startStation}"></td>
+        <td th:text="${problem.endStation}"></td>
+        <td th:each="choice : ${problem.choices}">
+            <ul>
+                <li th:text="${choice.name}+'('+${choice.id}+')'"></li>
+                <li th:text="${choice.time}+'분'"></li>
+            </ul>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<!-- Table Pagination Navigation -->
+<div>
+    <a th:href="@{/admin/fillblank/problemList?page=0}">처음</a>
+    <a th:href="@{/admin/fillblank/problemList(page=${currentPage}-1)}">이전</a>
+    <span th:text="${currentPage}+1"/>
+    <a th:href="@{/admin/fillblank/problemList(page=${currentPage}+1)}">다음</a>
+</div>
+</body>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+    }
+
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #ddd;
+    }
+</style>
+</html>

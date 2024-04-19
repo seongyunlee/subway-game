@@ -43,7 +43,7 @@ class BestRouteService(
      * Pick right problem based on the score
      */
     fun getProblem(score: Int): BestRouteProblemDto {
-        val problem = bestRouteRepository.findById("1").orElseThrow()
+        val problem = bestRouteRepository.findAll().random()
         problem.apply {
             return BestRouteProblemDto(
                 id = problem.id,

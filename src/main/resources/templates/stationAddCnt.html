@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>역목록</title>
+    <a href="/admin">메인으로</a>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // get Query String from URL
+            const queryString = window.location.search;
+            if (queryString.includes("searchName")) {
+                const input = document.querySelector("#boardingCnt");
+                input.focus();
+            } else {
+                const input = document.querySelector("#stationName");
+                input.focus();
+            }
+        });
+    </script>
+</head>
+<body>
+<h1>역 목록</h1>
+<div>
+    <form action="/admin/addCnt/search" method="GET">
+        <input type="text" id="stationName" name="searchName" placeholder="역 이름"/>
+        <button type="submit">검색</button>
+    </form>
+</div>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Lines</th>
+        <th>Alias Names</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="station : ${stations}">
+        <td id="stationId" th:text="${station.id}"></td>
+        <td th:text="${station.name}"></td>
+        <td>
+            <ul th:each="line : ${station.lines}">
+                <li th:text="${line.lineId}"></li>
+            </ul>
+        </td>
+        <td>
+            <ul th:each="alias : ${station.aliasName}">
+                <li th:text="${alias.name}"></li>
+            </ul>
+        </td>
+        <td>
+            <form name="setBoardCnt" method="post" action="/admin/addCnt">
+                <input type="hidden" name="stationId" th:value="${station.id}">
+                <input id="boardingCnt" name="boardingCnt" th:value="${station.boardingCnt}">
+                <button type="submit">저장</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<!-- Table Pagination Navigation -->
+<div>
+    <a th:href="@{/admin/station-list?page=0}">처음</a>
+    <a th:href="@{/admin/station-list(page=${currentPage}-1)}">이전</a>
+    <span th:text="${currentPage}+1"/>
+    <a th:href="@{/admin/station-list(page=${currentPage}+1)}">다음</a>
+</div>
+</body>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+    }
+
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #ddd;
+    }
+</style>
+</html>

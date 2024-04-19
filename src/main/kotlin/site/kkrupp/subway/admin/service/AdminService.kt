@@ -3,9 +3,15 @@ package site.kkrupp.subway.admin.service
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import site.kkrupp.subway.admin.SaveStationRequestDto
+import site.kkrupp.subway.admin.domain.Admin
+import site.kkrupp.subway.admin.dto.LoginReqDto
+import site.kkrupp.subway.admin.repository.AdminRepository
+import site.kkrupp.subway.bestroute.domain.BestRouteProblemAnswer
+import site.kkrupp.subway.bestroute.repository.BestRouteRepository
 import site.kkrupp.subway.files.service.FileService
 import site.kkrupp.subway.fillblank.domain.FillBlankProblemAnswer
 import site.kkrupp.subway.fillblank.repository.FillBlankRepository
@@ -20,6 +26,9 @@ class AdminService(
     val stationRepository: StationRepository,
     val fillBlankRepository: FillBlankRepository,
     val fileService: FileService,
+    val bestRepository: BestRouteRepository,
+    val adminRepository: AdminRepository,
+    val bCrpytPasswordEncoder: BCryptPasswordEncoder,
 ) {
 
     fun getStationList(page: Int = 0): List<Station> {
@@ -101,6 +110,44 @@ class AdminService(
                 id = id ?: 0,
                 problemImage = fileUrl,
                 answer = stationRepository.findById(answer) ?: throw IllegalArgumentException("Invalid station id")
+            )
+        )
+    }
+
+    @Transactional
+    fun saveBoardingCnt(stationId: Long, boardingCnt: Int) {
+        val station = stationRepository.findById(stationId) ?: throw IllegalArgumentException("Invalid station id")
+        station.boardingCnt = boardingCnt
+        stationRepository.save(station)
+    }
+
+    @Transactional
+    fun saveBoardingCntByName(stationName: String, boardingCnt: Int) {
+        val findStation = stationRepository.findByNameOrAliasName_Name(stationName, stationName)
+        if (findStation.isNullOrEmpty()) {
+            throw IllegalArgumentException("Invalid station name")
+        }
+        findStation[0].boardingCnt = boardingCnt
+        stationRepository.save(findStation[0])
+    }
+
+    @Transactional
+    fun getBestRouteProblems(page: Int = 0): List<BestRouteProblemAnswer> {
+        return bestRepository.findAll(PageRequest.of(page, 100, Sort.by("id"))).content
+    }
+
+    @Transactional
+    fun getNumberOfBestRouteProblems(): Int {
+        return bestRepository.count().toInt()
+    }
+
+    @Transactional
+    fun join(loginReqDto: LoginReqDto) {
+        adminRepository.save(
+            Admin(
+                username = loginReqDto.username,
+                password = bCrpytPasswordEncoder.encode(loginReqDto.password),
+                role = "ADMIN"
             )
         )
     }

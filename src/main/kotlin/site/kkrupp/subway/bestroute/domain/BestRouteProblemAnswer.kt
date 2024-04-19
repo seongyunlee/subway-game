@@ -16,28 +16,28 @@ data class BestRouteProblemAnswer(
     @JoinColumn(name = "START_STATION")
     val startStation: Station,
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "END_STATION")
     val endStation: Station,
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "CHOICE1")
     val choice1: Station,
 
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "CHOICE2")
     val choice2: Station,
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "CHOICE3")
     val choice3: Station,
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "CHOICE4")
     val choice4: Station,
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "ANSWER")
     val answer: Station,
 

@@ -24,10 +24,11 @@ spring:
     include:
       - cloud
       - db
+      - admin
     active: local
 logging:
   level:
     org:
       hibernate:
         SQL: off
-    root: DEBUG
+    root: INFO

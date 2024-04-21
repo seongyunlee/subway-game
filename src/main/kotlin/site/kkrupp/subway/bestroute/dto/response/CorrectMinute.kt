@@ -1,6 +1,6 @@
 package site.kkrupp.subway.bestroute.dto.response
 
-data class CurrentMinute(
+data class CorrectMinute(
     val stationId: Long,
     val timeCost: Int,
 )

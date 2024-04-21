@@ -75,6 +75,21 @@ class AdminController(
         return "fillBlankProblem"
     }
 
+    @PostMapping("/fillblank/problemList/save")
+    fun saveFillBlankProblem(
+        model: Model,
+        @RequestParam stationName: String,
+        @RequestParam problemImage: MultipartFile
+    ): String {
+
+        val problem = adminService.findStationAndEnrollFillblankProblem(stationName, problemImage)
+        model.addAttribute("problems", listOf(problem))
+        model.addAttribute("currentPage", 0)
+
+        return "fillBlankProblem"
+    }
+
+
     @GetMapping("/fillblank/problemList/search")
     fun fillBlankProblem(model: Model, @RequestParam searchName: String): String {
         val problems = adminService.searchFillBlankProblemsByStationName(searchName)
@@ -158,6 +173,11 @@ class AdminController(
     @GetMapping("/login")
     fun loginForm(): String {
         return "login"
+    }
+
+    @GetMapping("/fillblank/makeProblem")
+    fun makeProblem(): String {
+        return "makeProblem"
     }
 
 

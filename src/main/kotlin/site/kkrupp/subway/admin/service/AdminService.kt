@@ -1,6 +1,7 @@
 package site.kkrupp.subway.admin.service
 
 import jakarta.transaction.Transactional
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -28,9 +29,12 @@ class AdminService(
     val fileService: FileService,
     val bestRepository: BestRouteRepository,
     val adminRepository: AdminRepository,
-    val bCrpytPasswordEncoder: BCryptPasswordEncoder,
+    val bCryptPasswordEncoder: BCryptPasswordEncoder,
 ) {
 
+    val logger = LoggerFactory.getLogger(this.javaClass)!!
+
+    @Transactional
     fun getStationList(page: Int = 0): List<Station> {
         return stationRepository.findAll(PageRequest.of(page, 100, Sort.by("id"))).content
     }
@@ -146,9 +150,38 @@ class AdminService(
         adminRepository.save(
             Admin(
                 username = loginReqDto.username,
-                password = bCrpytPasswordEncoder.encode(loginReqDto.password),
+                password = bCryptPasswordEncoder.encode(loginReqDto.password),
                 role = "ADMIN"
             )
         )
+    }
+
+    @Transactional
+    fun findStationAndEnrollFillblankProblem(stationName: String, problemImage: MultipartFile): FillBlankProblemAnswer {
+        val station = stationRepository.findByNameOrAliasName_Name(stationName, stationName)
+            ?: throw IllegalArgumentException("Invalid station name")
+        if (station.size > 1) {
+            throw IllegalArgumentException("Station name is ambiguous")
+        }
+        val problem = fillBlankRepository.findByAnswer_id(station[0].id)
+        val fileUrl = fileService.uploadFile(problemImage, UUID.randomUUID().toString())
+
+
+        logger.info("Station: ${station[0].name}, Problem Image: $fileUrl")
+
+        //TODO : 한 개역에 문제가 여러 개 있을 때 로직 처리.
+        if (problem.isNotEmpty()) {
+            problem[0].problemImage = fileUrl
+            fillBlankRepository.save(problem[0])
+        } else {
+            return fillBlankRepository.save(
+                FillBlankProblemAnswer(
+                    id = 0,
+                    problemImage = fileUrl,
+                    answer = station[0]
+                )
+            )
+        }
+        return problem[0]
     }
 }

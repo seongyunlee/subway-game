@@ -85,10 +85,10 @@ class BestRouteService(
             isCorrect = isCorrect,
             answer = problem.answer.id,
             correctMinute = listOf(
-                CurrentMinute(problem.choice1.id, problem.choice1Time),
-                CurrentMinute(problem.choice2.id, problem.choice2Time),
-                CurrentMinute(problem.choice3.id, problem.choice3Time),
-                CurrentMinute(problem.choice4.id, problem.choice4Time)
+                CorrectMinute(problem.choice1.id, problem.choice1Time),
+                CorrectMinute(problem.choice2.id, problem.choice2Time),
+                CorrectMinute(problem.choice3.id, problem.choice3Time),
+                CorrectMinute(problem.choice4.id, problem.choice4Time)
             ),
             newProblem = getProblem(player.gameScore),
             gameLife = player.gameLife,

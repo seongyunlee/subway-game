@@ -1,6 +1,7 @@
 package site.kkrupp.subway.fillblank.domain
 
 import jakarta.persistence.*
+import org.joda.time.DateTime
 import site.kkrupp.subway.station.domain.Station
 
 @Entity
@@ -13,9 +14,12 @@ data class FillBlankProblemAnswer(
     val id: Int,
 
     @Column(name = "PROBLEM_IMAGE")
-    val problemImage: String,
+    var problemImage: String,
 
     @OneToOne
     @JoinColumn(name = "ANSWER")
-    val answer: Station,
+    var answer: Station,
+
+    @Column
+    var createdAt: DateTime = DateTime.now()
 )

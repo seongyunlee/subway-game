@@ -119,14 +119,14 @@ class AdminService(
     }
 
     @Transactional
-    fun saveBoardingCnt(stationId: Long, boardingCnt: Int) {
+    fun saveBoardingCnt(stationId: Long, boardingCnt: Long) {
         val station = stationRepository.findById(stationId) ?: throw IllegalArgumentException("Invalid station id")
         station.boardingCnt = boardingCnt
         stationRepository.save(station)
     }
 
     @Transactional
-    fun saveBoardingCntByName(stationName: String, boardingCnt: Int) {
+    fun saveBoardingCntByName(stationName: String, boardingCnt: Long) {
         val findStation = stationRepository.findByNameOrAliasName_Name(stationName, stationName)
         if (findStation.isNullOrEmpty()) {
             throw IllegalArgumentException("Invalid station name")

@@ -3,6 +3,7 @@ package site.kkrupp.subway.fillblank.service
 import org.apache.coyote.BadRequestException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import site.kkrupp.subway.common.util.Sigmoid
 import site.kkrupp.subway.fillblank.domain.FillBlankProblemAnswer
 import site.kkrupp.subway.fillblank.dto.request.FillBlankSubmitAnswerRequestDto
 import site.kkrupp.subway.fillblank.dto.response.FillBlankProblemDto
@@ -33,10 +34,13 @@ class FillBlankService(
     }
 
     /**
-     * Pick right problem based on the score
+     * TODO: Pick right problem based on the score
      */
     fun getProblem(score: Int): FillBlankProblemDto {
-        val problem = fillBlankRepository.findAll().random()
+        val numberOfProblems = fillBlankRepository.count()
+        val randomIndex = Math.round(Sigmoid.randomSigmoid() * numberOfProblems)
+
+        val problem = fillBlankRepository.findNthSortedByBoardingCnt(randomIndex.toInt())
         problem.apply {
             return FillBlankProblemDto(
                 id = problem.id,
@@ -67,7 +71,7 @@ class FillBlankService(
             InternalError("Invalid problem id")
         }
 
-        val isCorrect = checkAnswer(dto.answer, problem)
+        val isCorrect = checkAnswerAndUpdateStatics(dto.answer, problem)
 
         if (!isCorrect) {
             player.gameLife -= 1
@@ -95,11 +99,18 @@ class FillBlankService(
         return result
     }
 
-    private fun checkAnswer(answer: String, problem: FillBlankProblemAnswer): Boolean {
+    private fun checkAnswerAndUpdateStatics(answer: String, problem: FillBlankProblemAnswer): Boolean {
         val correctAnswers = problem.answer.aliasName.map { it.name }.toMutableSet()
         correctAnswers.add(problem.answer.name)
 
         val isCorrect = correctAnswers.contains(answer.trim())
+
+        if (isCorrect) {
+            problem.correctCnt += 1
+        } else {
+            problem.wrongCnt += 1
+        }
+        fillBlankRepository.save(problem)
 
         return isCorrect
     }

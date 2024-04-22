@@ -52,5 +52,14 @@ data class BestRouteProblemAnswer(
 
     @Column(name = "CHOICE4_TIME")
     val choice4Time: Int,
+
+    @Column(name = "CORRECT_CNT")
+    var correctCnt: Long = 0,
+
+    @Column(name = "WRONG_CNT")
+    var wrongCnt: Long = 0,
+
+    @Column(name = "DIFFICULTY_INDEX")
+    var difficultyIndex: Long
 )
 

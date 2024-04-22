@@ -80,7 +80,7 @@ function enrollProblem(stationName, dataURI) {
         body: formData,
     }).then((response) => {
         if (response.ok) {
-            alert("저장 성공");
+            console.log("저장 성공");
         } else {
             alert("저장 실패");
         }

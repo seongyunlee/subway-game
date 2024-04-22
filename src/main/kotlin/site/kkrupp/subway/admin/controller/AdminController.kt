@@ -125,13 +125,13 @@ class AdminController(
     }
 
     @PostMapping("/addCnt")
-    fun saveCnt(model: Model, @RequestParam stationId: Long, @RequestParam boardingCnt: Int): String {
+    fun saveCnt(model: Model, @RequestParam stationId: Long, @RequestParam boardingCnt: Long): String {
         adminService.saveBoardingCnt(stationId, boardingCnt)
         return "redirect:/admin/addCnt"
     }
 
     @PostMapping("/saveCnt")
-    fun saveCnt(@RequestParam stationName: String, @RequestParam boardingCnt: Int): ResponseEntity<String> {
+    fun saveCnt(@RequestParam stationName: String, @RequestParam boardingCnt: Long): ResponseEntity<String> {
         adminService.saveBoardingCntByName(stationName, boardingCnt)
         return ResponseEntity("success", HttpStatus.OK)
     }

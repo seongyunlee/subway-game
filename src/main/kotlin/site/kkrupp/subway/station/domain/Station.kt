@@ -4,7 +4,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "station")
-class Station(
+data class Station(
     @Id
     @Column(name = "ID")
     val id: Long,
@@ -13,7 +13,7 @@ class Station(
     var name: String,
 
     @Column(name = "BOARDING_CNT")
-    var boardingCnt: Int?,
+    var boardingCnt: Long?,
 
     @OneToMany(mappedBy = "stationId", cascade = [CascadeType.ALL], orphanRemoval = true)
     @Enumerated(EnumType.STRING)

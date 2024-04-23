@@ -75,6 +75,7 @@ jobs:
         # Build a docker container and
         # push it to ECR so that it can
         # be deployed to ECS.
+        echo $DB_FILE
         echo $DB_FILE | base64 --decode >> ./src/main/resources/application-db.yml
         echo $CLOUD_FILE | base64 --decode >> ./src/main/resources/application-cloud.yml
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .

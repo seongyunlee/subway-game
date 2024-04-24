@@ -23,5 +23,15 @@ class WebMvcConfig(
             .addResourceLocations("classpath:/static/")
     }
 
+    override fun addCorsMappings(registry: CorsRegistry) {
+        registry.addMapping("/**")
+            .allowedOrigins("*")
+            .allowedMethods("GET", "POST", "PUT", "DELETE")
+
+        registry.addMapping("/api/**")
+            .allowedOrigins("https://zeehacheol.com")
+            .allowedMethods("GET", "POST", "PUT", "DELETE")
+    }
+
 
 }

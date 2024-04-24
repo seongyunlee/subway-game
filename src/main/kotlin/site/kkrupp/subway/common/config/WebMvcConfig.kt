@@ -22,4 +22,6 @@ class WebMvcConfig(
         registry.addResourceHandler("/static/**")
             .addResourceLocations("classpath:/static/")
     }
+
+
 }

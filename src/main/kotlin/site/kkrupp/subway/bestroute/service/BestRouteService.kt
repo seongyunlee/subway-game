@@ -7,6 +7,7 @@ import site.kkrupp.subway.bestroute.domain.BestRouteProblemAnswer
 import site.kkrupp.subway.bestroute.dto.request.BestRouteSubmitAnswerRequestDto
 import site.kkrupp.subway.bestroute.dto.response.*
 import site.kkrupp.subway.bestroute.repository.BestRouteRepository
+import site.kkrupp.subway.common.util.RandomUtil
 import site.kkrupp.subway.player.domain.Player
 import site.kkrupp.subway.player.repository.PlayerRepository
 import site.kkrupp.subway.utill.GameType
@@ -43,7 +44,10 @@ class BestRouteService(
      * Pick right problem based on the score
      */
     fun getProblem(score: Int): BestRouteProblemDto {
-        val problem = bestRouteRepository.findAll().random()
+        val totalProblems = bestRouteRepository.count()
+        val problemIndex = Math.round(RandomUtil.randomExponential() * totalProblems)
+        val problem = bestRouteRepository.getProblemSortedByDifficultyIndexDesc(problemIndex.toInt())
+
         problem.apply {
             return BestRouteProblemDto(
                 id = problem.id,
@@ -75,7 +79,7 @@ class BestRouteService(
 
         val problem = bestRouteRepository.findById(bestRouteSubmitAnswerRequestDto.problemId.toString()).orElseThrow()
 
-        val isCorrect = checkAnswer(bestRouteSubmitAnswerRequestDto.answer, problem)
+        val isCorrect = checkAnswerAndUpdateStatics(bestRouteSubmitAnswerRequestDto.answer, problem)
         if (isCorrect) {
             player.gameScore += 1
         } else {
@@ -105,7 +109,15 @@ class BestRouteService(
         return result
     }
 
-    private fun checkAnswer(answer: Long, problem: BestRouteProblemAnswer): Boolean {
-        return problem.answer.id == answer
+    private fun checkAnswerAndUpdateStatics(answer: Long, problem: BestRouteProblemAnswer): Boolean {
+        val isCorrect = problem.answer.id == answer
+        if (isCorrect) {
+            problem.correctCnt += 1
+        } else {
+            problem.wrongCnt += 1
+        }
+        bestRouteRepository.save(problem)
+
+        return isCorrect
     }
 }

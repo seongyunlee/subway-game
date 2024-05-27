@@ -49,7 +49,7 @@ class TravelService(
             playerId = playerInfo.playerId,
             chatContext = ChatContextDto(
                 currentLine = startLineId,
-                previousStationIds = listOf(nextStation.id),
+                previousStationIds = mutableListOf(nextStation.id),
             ),
             gameLife = playerInfo.gameLife,
             gameScore = playerInfo.gameScore,

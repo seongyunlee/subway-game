@@ -37,7 +37,7 @@ class TravelService(
         )!!
         val newContext = ChatContextDto(
             currentLine = startLineId,
-            previousStationIds = listOf(nextStation.id)
+            previousStationIds = mutableListOf(nextStation.id)
         )
 
         playerInfo.currentContext = newContext.toString()
@@ -201,11 +201,15 @@ class TravelService(
                     dealerAnswer = null,
                 )
             }
+
+            dto.chatContext.previousStationIds.let{
+                it.add(isCorrect.id)
+                it.add(nextStation.id)
+            }
+
             val newContext = ChatContextDto(
                 currentLine = currentLine,
                 previousStationIds = dto.chatContext.previousStationIds
-                        + isCorrect.id
-                        + nextStation.id
             )
 
             player.currentContext = newContext.toString()

@@ -25,6 +25,7 @@ spring:
       - cloud
       - db
       - admin
+      - discord
     active: local
 logging:
   level:

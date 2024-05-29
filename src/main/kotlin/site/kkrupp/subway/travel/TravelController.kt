@@ -3,6 +3,7 @@ package site.kkrupp.subway.travel
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
+import site.kkrupp.subway.common.monitoring.activity.UserActivityMonitor
 import site.kkrupp.subway.player.annotation.RequiredUser
 import site.kkrupp.subway.player.domain.Player
 import site.kkrupp.subway.travel.dto.request.TravelReportAnswerRequestDto
@@ -20,6 +21,7 @@ class TravelController(
 ) {
 
 
+    @UserActivityMonitor("Start travel game")
     @GetMapping("/start")
     fun startGame(
         @RequestParam startLine: String

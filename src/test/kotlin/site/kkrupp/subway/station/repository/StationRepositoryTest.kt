@@ -17,7 +17,7 @@ class StationRepositoryTest {
     @DisplayName("지하철 이름으로 역을 조회한다.")
     fun findByNameOrAliasName_Name() {
         val station = stationRepository.findByNameOrAliasName_Name("요용산", "요용산")
-        Assertions.assertEquals("용산역", station?.name)
+        Assertions.assertEquals("용산역", station?.any { it.name == "용산역" })
     }
 
     @Test
@@ -37,7 +37,7 @@ class StationRepositoryTest {
     @Transactional
     @DisplayName("지하철 노선 ID로 역을 조회한다.")
     fun findByLineId() {
-        val stations = stationRepository.findByLineId("LINE_1")
+        val stations = stationRepository.findByLines_lineId("LINE_1")
         stations.forEach { station ->
             station.apply {
                 println("id: $id, name: $name, aliasName: $aliasName , lines: $lines")

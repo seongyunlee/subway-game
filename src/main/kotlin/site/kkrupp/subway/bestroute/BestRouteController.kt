@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*
 import site.kkrupp.subway.bestroute.dto.request.BestRouteSubmitAnswerRequestDto
 import site.kkrupp.subway.bestroute.dto.response.BestRouteStartGameResponseDto
 import site.kkrupp.subway.bestroute.dto.response.BestRouteSubmitAnswerResponseDto
+import site.kkrupp.subway.common.monitoring.activity.UserActivityMonitor
 import site.kkrupp.subway.fillblank.service.BestRouteService
 import site.kkrupp.subway.player.annotation.RequiredUser
 import site.kkrupp.subway.player.domain.Player
@@ -18,6 +19,7 @@ class BestRouteController(
 ) {
 
 
+    @UserActivityMonitor("Start best route game")
     @GetMapping("/start")
     fun startGame(): ResponseEntity<BestRouteStartGameResponseDto> {
         return ResponseEntity.ok(bestRouteService.startGame())

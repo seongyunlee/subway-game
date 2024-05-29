@@ -39,9 +39,10 @@ class FillBlankService(
     fun getProblem(score: Int): FillBlankProblemDto {
         val numberOfProblems = fillBlankRepository.count()
         val randomIndex = Math.round(RandomUtil.randomExponential() * numberOfProblems)
-        logger.info("Random index: $randomIndex")
 
         val problem = fillBlankRepository.findNthSortedByBoardingCnt(randomIndex.toInt())
+
+
         problem.apply {
             return FillBlankProblemDto(
                 id = problem.id,

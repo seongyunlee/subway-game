@@ -75,7 +75,7 @@ class RankService(
         }
 
         val currentRank = currentPlayer?.let {
-            rankRepository.getInsertionOrder(gameType, it.gameScore, Duration.between(it.startTime, it.endTime!!))
+            rankRepository.getInsertionOrder(gameType, it.gameScore, Duration.between(it.startTime, it.endTime!!), koreanDate)
         }
         val duration = currentPlayer?.let { Duration.between(it.startTime, it.endTime!!) }
 

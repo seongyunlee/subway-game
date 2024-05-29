@@ -14,7 +14,7 @@ interface RankRepository : JpaRepository<Rank, String> {
         limit: Limit
     ): List<Rank>
 
-    @Query("SELECT COUNT(*) + 1 AS newScore FROM Rank WHERE score > :score AND gameType = :gameType AND (score != :score OR duration > :duration)")
-    fun getInsertionOrder(gameType: String, score: Int, duration: Duration): Int
+    @Query("SELECT COUNT(*) + 1 AS newScore FROM Rank WHERE score > :score AND gameType = :gameType AND (score != :score OR duration > :duration) AND createdAt= :createdAt")
+    fun getInsertionOrder(gameType: String, score: Int, duration: Duration, createdAt: LocalDate): Int
 
 }

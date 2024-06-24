@@ -32,4 +32,4 @@ logging:
     org:
       hibernate:
         SQL: off
-    root: INFO
+    root: DEBUG

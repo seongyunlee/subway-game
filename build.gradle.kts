@@ -41,6 +41,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("org.springframework.session:spring-session-jdbc:3.1.5")
     implementation("org.springframework.boot:spring-boot-starter-actuator:3.3.0")
+    implementation("org.apache.commons:commons-math3:3.6.1")
     implementation("com.mysql:mysql-connector-j")
     implementation("org.springframework.boot:spring-boot-starter-mustache")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

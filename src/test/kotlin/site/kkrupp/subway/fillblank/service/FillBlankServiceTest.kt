@@ -17,8 +17,9 @@ class FillBlankServiceTest {
     private lateinit var playerRepository: PlayerRepository
 
     @Test
-    @DisplayName("Test startGame method")
-    fun testStartGame() {
-        assertEquals(1, 1)
+    @DisplayName("0점일 때_문제_하나_가져오기")
+    fun testGetProblem() {
+        val problem = fillBlankService.getProblem(0);
+        println(problem)
     }
 }

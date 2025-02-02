@@ -45,7 +45,7 @@ class BestRouteService(
      */
     fun getProblem(score: Int): BestRouteProblemDto {
         val totalProblems = bestRouteRepository.count()
-        val problemIndex = Math.round(RandomUtil.randomBeta(1.0 / 112) * totalProblems)
+        val problemIndex = Math.round(RandomUtil.randomBeta(score.toDouble() / totalProblems) * totalProblems)
         val problem = bestRouteRepository.getProblemSortedByDifficultyIndexDesc(problemIndex.toInt())
 
         problem.apply {

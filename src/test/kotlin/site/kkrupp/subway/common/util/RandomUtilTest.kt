@@ -1,19 +1,14 @@
 package site.kkrupp.subway.common.util
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class RandomUtilTest {
 
     @Test
     fun testRandomExponential() {
-        val randomNumbers = (0..1000).map { RandomUtil.randomBeta(1.0 / 123) }
+        val randomNumbers = (1..10).map { e -> RandomUtil.randomBeta(e.toDouble() / 123) }
 
-        // show graph with 0.1 interval
-        val histogram = randomNumbers.groupBy { (it * 10).toInt() }
-            .mapValues { it.value.size }
-            .toSortedMap()
-
-        println(histogram)
+        Assertions.assertTrue(randomNumbers.all { it >= 0.0 && it <= 1.0 })
     }
 }

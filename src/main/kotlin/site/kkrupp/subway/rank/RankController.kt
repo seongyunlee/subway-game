@@ -28,4 +28,5 @@ class RankController(
     fun getRank(@PathVariable gameType: String, @RequestParam playerId: String?): ResponseEntity<GetRankResponseDto> {
         return ResponseEntity.ok(rankService.getRank(gameType, playerId))
     }
+
 }

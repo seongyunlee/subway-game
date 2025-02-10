@@ -90,6 +90,27 @@ class RankService(
     }
 
     @Transactional
+    fun changeRank(dto: ChangeRankNickNameRequestDto): EnrollRankResponseDto {
+        val koreanDate = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDate()
+
+        val player = playerRepository.findById(dto.playerId).orElseThrow {
+            BadRequestException("Invalid player id")
+        }
+
+        val newRank = Rank(
+            gameType = player.gameType.name,
+            score = player.gameScore,
+            createdAt = koreanDate,
+            playerId = dto.playerId,
+            duration = Duration.between(player.startTime, player.endTime!!),
+            nickName = dto.nickName
+        )
+        rankRepository.save(newRank)
+
+        return EnrollRankResponseDto(true)
+    }
+
+    @Transactional
     fun getRank(gameType: String, playerId: String?): GetRankResponseDto {
 
         //TODO: Refactor this code

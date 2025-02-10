@@ -14,6 +14,7 @@ import site.kkrupp.subway.rank.repository.RankRepository
 import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.Random
 import kotlin.jvm.optionals.getOrNull
 
 
@@ -39,6 +40,7 @@ class RankService(
             Duration.between(player.startTime, player.endTime!!),
             koreanDate
         )
+        val nickName = "승객${Random().nextInt(1, 100)}"
 
         val newRank = Rank(
             gameType = player.gameType.name,
@@ -46,7 +48,7 @@ class RankService(
             createdAt = koreanDate,
             playerId = player.playerId,
             duration = Duration.between(player.startTime, player.endTime!!),
-            nickName = "Anonymous"
+            nickName = nickName
         )
 
         rankRepository.save(newRank)
@@ -90,6 +92,9 @@ class RankService(
     @Transactional
     fun getRank(gameType: String, playerId: String?): GetRankResponseDto {
 
+        //TODO: Refactor this code
+        var nowPlayerId: String? = playerId
+
         val koreanDate = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDate()
 
         val ranks = rankRepository.findByGameTypeAndCreatedAtOrderByScoreDescDurationAsc(
@@ -98,7 +103,14 @@ class RankService(
             createdAt = koreanDate
         )
 
-        val currentPlayer = playerId?.let { playerRepository.findById(it).getOrNull() }
+
+        val alreadyExistPlayer = ranks.find { it.playerId == playerId }
+
+        alreadyExistPlayer?.let {
+            nowPlayerId = null
+        }
+
+        val currentPlayer = nowPlayerId?.let { playerRepository.findById(it).getOrNull() }
 
         val currentRank: Int? = currentPlayer?.let {
             if (it.endTime == null) {

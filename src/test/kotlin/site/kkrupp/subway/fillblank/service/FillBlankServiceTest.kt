@@ -22,4 +22,14 @@ class FillBlankServiceTest {
         val problem = fillBlankService.getProblem(0);
         println(problem)
     }
+
+    @Test
+    @DisplayName("문제 100개 가져와서 문제 번호 그룹핑")
+    fun testGetProblems() {
+        val problems = (1..100).map { fillBlankService.getProblem(30) }
+        val ids = problems.map {
+            it.id
+        }.sorted()
+
+    }
 }

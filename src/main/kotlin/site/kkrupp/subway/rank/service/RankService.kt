@@ -1,9 +1,12 @@
 package site.kkrupp.subway.fillblank.service
 
+import jakarta.transaction.Transactional
 import org.apache.coyote.BadRequestException
+import org.hibernate.sql.Insert
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Limit
 import org.springframework.stereotype.Service
+import site.kkrupp.subway.player.domain.Player
 import site.kkrupp.subway.player.repository.PlayerRepository
 import site.kkrupp.subway.rank.Rank
 import site.kkrupp.subway.rank.dto.*
@@ -21,6 +24,35 @@ class RankService(
 ) {
 
     val logger = LoggerFactory.getLogger(RankService::class.java)
+
+
+    private fun enrollRankAnonymously(player: Player): Int {
+        val koreanDate = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDate()
+
+        if (player.endTime?.toLocalDate() != koreanDate) {
+            throw BadRequestException("Old player cannot enroll rank")
+        }
+
+        val insertOrder = rankRepository.getInsertionOrder(
+            player.gameType.name,
+            player.gameScore,
+            Duration.between(player.startTime, player.endTime!!),
+            koreanDate
+        )
+
+        val newRank = Rank(
+            gameType = player.gameType.name,
+            score = player.gameScore,
+            createdAt = koreanDate,
+            playerId = player.playerId,
+            duration = Duration.between(player.startTime, player.endTime!!),
+            nickName = "Anonymous"
+        )
+
+        rankRepository.save(newRank)
+
+        return insertOrder
+    }
 
     fun enrollRank(dto: EnrollRankRequestDto): EnrollRankResponseDto {
         val koreanDate = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDate()
@@ -55,9 +87,9 @@ class RankService(
         return EnrollRankResponseDto(true)
     }
 
+    @Transactional
     fun getRank(gameType: String, playerId: String?): GetRankResponseDto {
 
-        logger.info("Get rank for gameType: $gameType, playerId: $playerId")
         val koreanDate = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDate()
 
         val ranks = rankRepository.findByGameTypeAndCreatedAtOrderByScoreDescDurationAsc(
@@ -68,15 +100,13 @@ class RankService(
 
         val currentPlayer = playerId?.let { playerRepository.findById(it).getOrNull() }
 
-        currentPlayer?.let {
+        val currentRank: Int? = currentPlayer?.let {
             if (it.endTime == null) {
                 throw BadRequestException("Invalid player id")
             }
+            enrollRankAnonymously(it);
         }
 
-        val currentRank = currentPlayer?.let {
-            rankRepository.getInsertionOrder(gameType, it.gameScore, Duration.between(it.startTime, it.endTime!!), koreanDate)
-        }
         val duration = currentPlayer?.let { Duration.between(it.startTime, it.endTime!!) }
 
         val result = GetRankResponseDto(
@@ -88,7 +118,13 @@ class RankService(
                     nickName = it.nickName
                 )
             },
-            playerInfo = currentPlayer?.let { PlayerInfoDto(it.gameScore, duration!!.toKoreanString(), currentRank!!) }
+            playerInfo = currentPlayer?.let {
+                PlayerInfoDto(
+                    it.gameScore,
+                    duration?.toKoreanString() ?: "0분 0초",
+                    currentRank ?: 0
+                )
+            }
         )
 
         return result

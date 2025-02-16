@@ -33,3 +33,8 @@ logging:
       hibernate:
         SQL: off
     root: ERROR
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus"

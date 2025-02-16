@@ -34,7 +34,9 @@ logging:
         SQL: off
     root: ERROR
 management:
+  server:
+    port: 9292
   endpoints:
     web:
       exposure:
-        include: "prometheus"
+        include: prometheus, health, info

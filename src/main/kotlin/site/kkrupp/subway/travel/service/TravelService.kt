@@ -174,7 +174,11 @@ class TravelService(
         if (player.gameType != GameType.TRAVEL) {
             throw BadRequestException("Invalid game type")
         }
+
         val isCorrect = checkAnswer(dto.chatContext, dto.answer, dto.transferTo)
+        dto.chatContext.previousStationIds.let {
+            isCorrect?.let { station -> it.add(station.id) }
+        }
         if (isCorrect != null) {
             val currentLine = dto.transferTo ?: dto.chatContext.currentLine
             player.gameScore += 1
@@ -202,10 +206,7 @@ class TravelService(
                 )
             }
 
-            dto.chatContext.previousStationIds.let{
-                it.add(isCorrect.id)
-                it.add(nextStation.id)
-            }
+            dto.chatContext.previousStationIds.add(nextStation.id)
 
             val newContext = ChatContextDto(
                 currentLine = currentLine,
@@ -256,7 +257,7 @@ class TravelService(
 
     private fun checkAnswer(chatContext: ChatContextDto, answer: String, transferTo: String?): Station? {
         val enteredStations = stationRepository.findByNameOrAliasName_Name(answer, answer)
-        logger.info("Entered Stations: $enteredStations")
+        logger.debug("Entered Stations: {}", enteredStations)
         if (enteredStations.isNullOrEmpty()) {
             return null
         }

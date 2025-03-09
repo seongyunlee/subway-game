@@ -1,5 +1,6 @@
 package site.kkrupp.subway.fillblank.service
 
+import jakarta.transaction.Transactional
 import org.apache.coyote.BadRequestException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -9,15 +10,14 @@ import site.kkrupp.subway.bestroute.dto.response.*
 import site.kkrupp.subway.bestroute.repository.BestRouteRepository
 import site.kkrupp.subway.common.util.RandomUtil
 import site.kkrupp.subway.player.domain.Player
-import site.kkrupp.subway.player.repository.PlayerRepository
+import site.kkrupp.subway.player.service.PlayerService
+import site.kkrupp.subway.utill.Utils
 import site.kkrupp.subway.utill.GameType
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
 @Service
 class BestRouteService(
     private val bestRouteRepository: BestRouteRepository,
-    private val playerRepository: PlayerRepository
+    private val playerService: PlayerService,
 ) {
 
     val logger = LoggerFactory.getLogger(this.javaClass)!!
@@ -32,42 +32,48 @@ class BestRouteService(
      * - gameLife (남은 목숨))  를 가지고 있음
      */
     fun startGame(): BestRouteStartGameResponseDto {
-        val playerInfo = initialPlayer()
-        getProblem(playerInfo.gameScore).let {
-            playerInfo.currentContext = it.id.toString()
-            playerRepository.save(playerInfo)
-            return BestRouteStartGameResponseDto(playerInfo.playerId, it, playerInfo.gameLife, playerInfo.gameScore)
-        }
+        val player = initializePlayer()
+        val problem = getProblem(player.gameScore)
+        savePlayerContext(player, problem)
+        return problem.toStartDto(player)
     }
 
-    /**
-     * Pick right problem based on the score
-     */
-    fun getProblem(score: Int): BestRouteProblemDto {
-        val totalProblems = bestRouteRepository.count()
-        val problemIndex = Math.round(RandomUtil.randomBeta(score.toDouble() / totalProblems) * totalProblems)
-        val problem = bestRouteRepository.getProblemSortedByDifficultyIndexDesc(problemIndex.toInt())
 
-        problem.apply {
-            return BestRouteProblemDto(
-                id = problem.id,
-                startStation = startStation.name,
-                endStation = endStation.name,
-                choices = listOf(choice1, choice2, choice3, choice4).map { StationChoiceDto(it.id, it.name) }
-            )
-        }
-    }
-
-    private fun initialPlayer(): Player {
-        val playerInfo = Player(gameType = GameType.BESTROUTE, gameLife = 3)
-        return playerRepository.save(playerInfo)
-    }
-
+    @Transactional
     fun submitAnswer(
-        bestRouteSubmitAnswerRequestDto: BestRouteSubmitAnswerRequestDto,
+        dto: BestRouteSubmitAnswerRequestDto,
         player: Player
     ): BestRouteSubmitAnswerResponseDto {
-        // TODO: 정답 확인 로직
+
+        verifyPlayer(player, dto)
+
+        val prevProblem =
+            bestRouteRepository.findById(dto.problemId.toString()).orElseThrow()
+
+        val isCorrect = checkAnswerAndUpdateStatics(dto.answer, prevProblem)
+
+        if (isCorrect) {
+            player.increaseScore()
+        } else {
+            player.decreaseLife()
+        }
+
+        if (player.gameLife <= 0) {
+            player.endTime = Utils.getKoreaLocalDateTime()
+        }
+
+        val newProblem = getProblem(player.gameScore)
+
+        savePlayerContext(player, newProblem)
+
+        return newProblem.toSubmitAnswerDto(isCorrect, prevProblem)
+
+    }
+
+    private fun verifyPlayer(
+        player: Player,
+        bestRouteSubmitAnswerRequestDto: BestRouteSubmitAnswerRequestDto
+    ) {
         if (player.gameLife <= 0) {
             throw BadRequestException("Game Over")
         }
@@ -76,38 +82,34 @@ class BestRouteService(
             logger.info("Malicious request detected. Player: ${player.playerId}")
             throw IllegalArgumentException("Invalid request")
         }
-
-        val problem = bestRouteRepository.findById(bestRouteSubmitAnswerRequestDto.problemId.toString()).orElseThrow()
-
-        val isCorrect = checkAnswerAndUpdateStatics(bestRouteSubmitAnswerRequestDto.answer, problem)
-        if (isCorrect) {
-            player.gameScore += 1
-        } else {
-            player.gameLife -= 1
-        }
-        val result = BestRouteSubmitAnswerResponseDto(
-            isCorrect = isCorrect,
-            answer = problem.answer.id,
-            correctMinute = listOf(
-                CorrectMinute(problem.choice1.id, problem.choice1Time),
-                CorrectMinute(problem.choice2.id, problem.choice2Time),
-                CorrectMinute(problem.choice3.id, problem.choice3Time),
-                CorrectMinute(problem.choice4.id, problem.choice4Time)
-            ),
-            newProblem = getProblem(player.gameScore),
-            gameLife = player.gameLife,
-            gameScore = player.gameScore
-        )
-
-
-        player.currentContext = result.newProblem.id.toString()
-        if (player.gameLife <= 0) {
-            player.endTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime()
-        }
-        playerRepository.save(player)
-
-        return result
     }
+
+    private fun initializePlayer(): Player {
+        val playerInfo = Player(gameType = GameType.BESTROUTE, gameLife = 3)
+        playerService.savePlayer(playerInfo)
+        return playerInfo
+    }
+
+    private fun savePlayerContext(
+        playerInfo: Player,
+        problem: BestRouteProblemAnswer
+    ) {
+        playerInfo.currentContext = problem.id.toString()
+        playerService.savePlayer(playerInfo)
+    }
+
+
+    /**
+     * Pick right problem based on the score
+     */
+    private fun getProblem(score: Int): BestRouteProblemAnswer {
+        val totalProblems = bestRouteRepository.count()
+        val problemIndex = Math.round(RandomUtil.randomBeta(score.toDouble() / totalProblems) * totalProblems)
+        val problem = bestRouteRepository.getProblemSortedByDifficultyIndexDesc(problemIndex.toInt())
+
+        return problem
+    }
+
 
     private fun checkAnswerAndUpdateStatics(answer: Long, problem: BestRouteProblemAnswer): Boolean {
         val isCorrect = problem.answer.id == answer

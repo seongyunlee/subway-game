@@ -5,7 +5,6 @@
 - **Spring Boot**: 빠른 개발을 위한 애플리케이션 빌딩
 - **Spring Data JPA**: 데이터베이스 상호작용
 - **Spring Security**: 애플리케이션 보안, 세션 기반 어드민 페이지 로그인
-- **MySQL**: 주요 데이터베이스
 - **AWS SDK**: Amazon S3와 상호작용
 - **Thymleaf**: 어드민 페이지 서빙
 - **Spring Actuator**: 성능 모니터링 - Prometheus - Granfana를 이용한 모니터링

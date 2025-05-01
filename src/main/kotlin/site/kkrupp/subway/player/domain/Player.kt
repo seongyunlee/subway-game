@@ -33,4 +33,12 @@ data class Player(
 
     @Column(name = "END_TIME")
     var endTime: LocalDateTime? = null,
-)
+) {
+    fun increaseScore() {
+        gameScore++
+    }
+
+    fun decreaseLife() {
+        gameLife--
+    }
+}

@@ -125,8 +125,8 @@ class TravelService(
                 playerRepository.save(player)
                 return gameOverDto(player)
             }
-            dto.chatContext.previousStationIds.removeLast()
-            dto.chatContext.previousStationIds.addLast(changeStation.id)
+            dto.chatContext.previousStationIds.removeAt(dto.chatContext.previousStationIds.lastIndex)
+            dto.chatContext.previousStationIds.add(changeStation.id)
             player.currentContext = dto.chatContext.toString()
             playerRepository.save(player)
             return TravelReportAnswerResponseDto(

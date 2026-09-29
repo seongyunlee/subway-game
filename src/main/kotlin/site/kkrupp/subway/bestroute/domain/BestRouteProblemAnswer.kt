@@ -12,7 +12,9 @@ data class BestRouteProblemAnswer(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
 
-    @OneToOne
+    // 한 역이 여러 문제의 출발역이 될 수 있다.
+    // @OneToOne 이면 Hibernate 가 START_STATION 에 UNIQUE 를 걸어 역당 1문제로 제한된다.
+    @ManyToOne
     @JoinColumn(name = "START_STATION")
     val startStation: Station,
 

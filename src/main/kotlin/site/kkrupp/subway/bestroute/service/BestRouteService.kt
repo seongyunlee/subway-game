@@ -2,6 +2,7 @@ package site.kkrupp.subway.fillblank.service
 
 import org.apache.coyote.BadRequestException
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.stereotype.Service
 import site.kkrupp.subway.bestroute.domain.BestRouteProblemAnswer
 import site.kkrupp.subway.bestroute.dto.request.BestRouteSubmitAnswerRequestDto
@@ -22,6 +23,11 @@ class BestRouteService(
 
     val logger = LoggerFactory.getLogger(this.javaClass)!!
 
+    companion object {
+        /** 이 점수에 도달하면 가장 어려운 구간의 문제가 나온다. */
+        private const val MAX_DIFFICULTY_SCORE = 30
+    }
+
     /**
      *  문제를 하나를 건네줌.
      *  session에서 score를 가져와야함.
@@ -40,13 +46,29 @@ class BestRouteService(
         }
     }
 
+    /** 문제 테이블을 재적재한 뒤 호출해야 캐시가 옛 문제를 내보내지 않는다. */
+    @CacheEvict(value = ["bestRouteProblem"], allEntries = true)
+    fun evictProblemCache() {
+        logger.info("best route problem cache evicted")
+    }
+
     /**
-     * Pick right problem based on the score
+     * 점수가 높을수록 난이도 높은 문제가 나오도록 베타분포로 인덱스를 뽑는다.
+     * DIFFICULTY_INDEX 는 "쉬움 점수"라 내림차순 0번이 가장 쉬운 문제다.
      */
     fun getProblem(score: Int): BestRouteProblemDto {
         val totalProblems = bestRouteRepository.count()
-        val problemIndex = Math.round(RandomUtil.randomBeta(score.toDouble() / totalProblems) * totalProblems)
+        if (totalProblems == 0L) throw IllegalStateException("No best-route problems available")
+
+        // 난이도는 "점수 / 목표점수" 로 정규화한다. 문제 개수로 나누면 (2000개 기준)
+        // 30점을 받아도 p 가 0.015 에 그쳐 난이도가 오르지 않는다.
+        val difficulty = (score.toDouble() / MAX_DIFFICULTY_SCORE).coerceIn(0.0, 1.0)
+
+        val raw = Math.round(RandomUtil.randomBeta(difficulty) * totalProblems)
+        val problemIndex = raw.coerceIn(0, totalProblems - 1)
+
         val problem = bestRouteRepository.getProblemSortedByDifficultyIndexDesc(problemIndex.toInt())
+            ?: throw IllegalStateException("No problem at index $problemIndex of $totalProblems")
 
         problem.apply {
             return BestRouteProblemDto(

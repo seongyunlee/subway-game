@@ -24,4 +24,5 @@ enum class LineID(val id: String) {
     LINE_INCHEON2("line-incheon2"),
     LINE_SUINBUNDANG("line-suinbundang"),
     LINE_UIJEONGBU("line-uijeongbu"),
+    LINE_GTXA("line-gtx-a"),
 }

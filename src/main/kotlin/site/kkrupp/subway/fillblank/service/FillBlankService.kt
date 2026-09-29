@@ -25,6 +25,11 @@ class FillBlankService(
 
     private val logger = LoggerFactory.getLogger(this.javaClass)!!
 
+    companion object {
+        /** 이 점수에 도달하면 가장 어려운 구간의 문제가 나온다. */
+        private const val MAX_DIFFICULTY_SCORE = 30
+    }
+
     fun startGame(): FillBlankStartGameResponseDto {
         val playerInfo = initialPlayer()
         val problem = getProblem(playerInfo.gameScore)
@@ -34,21 +39,27 @@ class FillBlankService(
     }
 
     /**
-     * TODO: Pick right problem based on the score
+     * 점수가 높을수록 난이도 높은(= 승하차 인원이 적은) 문제가 나오도록 베타분포로 인덱스를 뽑는다.
      */
     fun getProblem(score: Int): FillBlankProblemDto {
         val numberOfProblems = fillBlankRepository.count()
-        val randomIndex = Math.round(RandomUtil.randomBeta(score.toDouble() / numberOfProblems) * numberOfProblems)
+        if (numberOfProblems == 0L) throw IllegalStateException("No fill-blank problems available")
 
-        val problem = fillBlankRepository.findNthSortedByBoardingCnt(randomIndex.toInt())
+        // 난이도는 "점수 / 목표점수" 로 정규화한다. 문제 개수로 나누면 (541개 기준) 40점을 받아도
+        // p 가 0.07 에 그쳐 난이도가 사실상 오르지 않는다.
+        val difficulty = (score.toDouble() / MAX_DIFFICULTY_SCORE).coerceIn(0.0, 1.0)
 
+        // randomBeta 가 1.0 에 가까우면 인덱스가 전체 개수와 같아져 OFFSET 이 범위를 벗어난다.
+        val raw = Math.round(RandomUtil.randomBeta(difficulty) * numberOfProblems)
+        val index = raw.coerceIn(0, numberOfProblems - 1).toInt()
 
-        problem.apply {
-            return FillBlankProblemDto(
-                id = problem.id,
-                problemImage = problem.problemImage,
-            )
-        }
+        val problem = fillBlankRepository.findNthSortedByBoardingCnt(index)
+            ?: throw IllegalStateException("No problem at index $index of $numberOfProblems")
+
+        return FillBlankProblemDto(
+            id = problem.id,
+            problemImage = problem.problemImage,
+        )
     }
 
     private fun initialPlayer(): Player {
